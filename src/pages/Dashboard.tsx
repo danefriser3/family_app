@@ -9,6 +9,14 @@ import {
 import { StatCard } from '../components/dashboard/StatCard';
 import { DataTable } from '../components/dashboard/DataTable';
 import { StatCardData, User, TableColumn } from '../types';
+import { gql } from '@apollo/client';
+import { useQuery } from '@apollo/client/react';
+
+const HELLO_QUERY = gql`
+  query Hi {
+    hello
+  }
+`;
 
 // Dati di esempio
 const statsData: StatCardData[] = [
@@ -95,7 +103,14 @@ const tableColumns: TableColumn[] = [
     { id: 'lastLogin', label: 'Ultimo Accesso' },
 ];
 
+type HelloQueryData = {
+    hello: string;
+};
+
 export const Dashboard: React.FC = () => {
+
+    const { data } = useQuery<HelloQueryData>(HELLO_QUERY);
+
     return (
         <Box sx={{
             display: 'flex',
@@ -105,7 +120,7 @@ export const Dashboard: React.FC = () => {
             <Card>
                 <CardContent className="!p-4">
                     <Typography variant="h4" className="font-bold text-gray-800">
-                        Dashboard Overview
+                        Dashboard Overview {data ? data.hello : ''}
                     </Typography>
                 </CardContent>
             </Card>

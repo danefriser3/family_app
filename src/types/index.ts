@@ -30,12 +30,12 @@ export interface User {
 // ========================
 
 export interface Expense {
-  id: number;
+  id?: string;
   description: string;
   amount: number;
+  card_id?: string;
   date: string;
   category?: string;
-  userId?: number;
 }
 
 // ========================

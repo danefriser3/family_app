@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Expense } from '../types';
 import {
     Box,
@@ -22,51 +22,65 @@ import {
     CardHeader,
     CardContent,
     Divider,
+    IconButton,
+    Checkbox,
+    ButtonGroup,
 } from '@mui/material';
+import { useMutation, useQuery } from '@apollo/client/react';
+import { GET_CARDS, GET_EXPENSES } from '../graphql/queries';
+import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES } from '../graphql/mutations';
+import { Delete, Sync } from '@mui/icons-material';
 
 // Definizione delle carte
 interface Card {
     id: string;
     name: string;
+    // ...existing code...
     color: string;
 }
-
-const cards: Card[] = [
-    { id: 'card1', name: 'N26', color: '#1976d2' },
-    { id: 'card2', name: 'Revolut', color: '#388e3c' },
-    { id: 'card3', name: 'Hype', color: '#f57c00' },
-];
-
-// Spese iniziali per ogni carta
-const initialExpenses: Record<string, Expense[]> = {
-    card1: [
-        { id: 1, description: 'Spesa alimentare', amount: 50, date: '2024-06-01', category: 'Alimentari' },
-        { id: 2, description: 'Farmacia', amount: 25, date: '2024-06-02', category: 'Salute' },
-    ],
-    card2: [
-        { id: 3, description: 'Benzina', amount: 40, date: '2024-06-01', category: 'Trasporti' },
-        { id: 4, description: 'Pranzo', amount: 15, date: '2024-06-03', category: 'Ristorazione' },
-    ],
-    card3: [
-        { id: 5, description: 'Bolletta luce', amount: 80, date: '2024-06-01', category: 'Utilities' },
-        { id: 6, description: 'Bolletta gas', amount: 60, date: '2024-06-02', category: 'Utilities' },
-    ],
-};
+export interface GetCardsData {
+    cards: Card[];
+}
+    // ...existing code...
+export interface GetExpensesData {
+    expenses: Expense[];
+}
 
 const Expenses: React.FC = () => {
-    const [allExpenses, setAllExpenses] = useState<Record<string, Expense[]>>(initialExpenses);
+    const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
     const [selectedCard, setSelectedCard] = useState<string>('all');
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
     const [category, setCategory] = useState('');
+    const [selectedIds, setSelectedIds] = useState<string[]>([]);
+
+
+    const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
+    const { data: expenses, loading, error, refetch } = useQuery<GetExpensesData>(GET_EXPENSES, {
+        variables: { cardId: selectedCard === 'all' ? null : selectedCard }
+    });
+    const [deleteExpense] = useMutation(DELETE_EXPENSE);
+
+    const [deleteExpenses] = useMutation(DELETE_EXPENSES);
+
+    // ...existing code...
+    const [addExpense] = useMutation(ADD_EXPENSE);
+
+
+    useEffect(() => {
+        if (expenses) {
+            setAllExpenses(expenses.expenses);
+        }
+    }, [expenses]);
+
+    useEffect(() => {
+        setAllExpenses(expenses?.expenses || []);
+    }, [expenses, cards]);
 
     // Funzione per ottenere le spese da visualizzare
     const getDisplayedExpenses = (): Expense[] => {
-        if (selectedCard === 'all') {
-            return Object.values(allExpenses).flat();
-        }
-        return allExpenses[selectedCard] || [];
+        return allExpenses || [];
     };
 
     // Funzione per calcolare il totale delle spese
@@ -77,6 +91,13 @@ const Expenses: React.FC = () => {
     // Gestione cambio carta
     const handleCardChange = (event: SelectChangeEvent) => {
         setSelectedCard(event.target.value);
+        refetch({ cardId: event.target.value === 'all' ? null : event.target.value })
+    };
+
+    // Function to delete an expense by id
+    const handleDeleteExpense = (id?: string) => {
+        setAllExpenses(prev => prev.filter(expense => expense.id !== id));
+        deleteExpense({ variables: { id } });
     };
 
     // Funzione per aggiungere una nuova spesa
@@ -85,23 +106,54 @@ const Expenses: React.FC = () => {
         if (!description || !amount || !date || !category || selectedCard === 'all') return;
 
         const newExpense: Expense = {
-            id: Date.now(), // Usiamo timestamp come ID temporaneo
             description,
             amount: parseFloat(amount),
             date,
             category,
+            card_id: selectedCard === 'all' ? undefined : selectedCard
         };
 
-        setAllExpenses(prev => ({
-            ...prev,
-            [selectedCard]: [...(prev[selectedCard] || []), newExpense],
-        }));
+        setAllExpenses(prev => ([...prev, newExpense]));
+
+        addExpense({ variables: { expenseInput: newExpense } });
 
         setDescription('');
         setAmount('');
         setDate('');
         setCategory('');
     };
+
+    const handleSelect = (id: string) => {
+        setSelectedIds((prev) =>
+            prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+        );
+    };
+
+    const handleSelectAll = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.checked) {
+            setSelectedIds(
+                expenses?.expenses
+                    .map((e) => e.id)
+                    .filter((id): id is string => typeof id === 'string')
+                || []
+            );
+        } else {
+            setSelectedIds([]);
+        }
+    };
+
+    function handleDeleteSelected(_: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
+        // Delete all selected expenses
+        const idsToDelete = selectedIds;
+        if (idsToDelete.length === 0) return;
+
+        // Optimistically update UI
+        setAllExpenses(prev => prev.filter(expense => !idsToDelete.includes(expense.id ?? '')));
+
+        deleteExpenses({ variables: { ids: idsToDelete } });
+        // Clear selection
+        setSelectedIds([]);
+    }
 
     return (
         <Card>
@@ -111,49 +163,56 @@ const Expenses: React.FC = () => {
             <Divider />
             <CardContent>
                 <Stack direction="column" spacing={3}>
-                    <FormControl fullWidth sx={{ maxWidth: 300 }}>
-                        <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
-                        <Select
-                            labelId="card-select-label"
-                            value={selectedCard}
-                            onChange={handleCardChange}
-                            label="Seleziona Carta"
-                            size="small"
-                        >
-                            <MenuItem value="all">
-                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                    <Box
-                                        sx={{
-                                            width: 12,
-                                            height: 12,
-                                            borderRadius: '50%',
-                                            background: 'linear-gradient(45deg, #1976d2, #388e3c, #f57c00)'
-                                        }}
-                                    />
-                                    Tutte le Carte
-                                </Box>
-                            </MenuItem>
-                            {cards.map((card) => (
-                                <MenuItem key={card.id} value={card.id}>
+                    <Stack direction="row">
+                        <FormControl fullWidth sx={{ maxWidth: 300 }}>
+                            <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
+                            <Select
+                                labelId="card-select-label"
+                                value={selectedCard}
+                                onChange={handleCardChange}
+                                label="Seleziona Carta"
+                                size="small"
+                            >
+                                <MenuItem value="all">
                                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                                         <Box
                                             sx={{
                                                 width: 12,
                                                 height: 12,
                                                 borderRadius: '50%',
-                                                backgroundColor: card.color
+                                                background: 'linear-gradient(45deg, #1976d2, #388e3c, #f57c00)'
                                             }}
                                         />
-                                        {card.name}
+                                        Tutte le Carte
                                     </Box>
                                 </MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
+                                {cards?.cards.map((card) => (
+                                    <MenuItem key={card.id} value={card.id}>
+                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                            <Box
+                                                sx={{
+                                                    width: 12,
+                                                    height: 12,
+                                                    borderRadius: '50%',
+                                                    backgroundColor: card.color
+                                                }}
+                                            />
+                                            {card.name}
+                                        </Box>
+                                    </MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        <IconButton onClick={() => {
+                            refetch();
+                        }}>
+                            <Sync />
+                        </IconButton>
+                    </Stack>
 
                     <Card className='p-3'>
                         <Typography variant="h6">
-                            Riepilogo {selectedCard === 'all' ? 'Tutte le Carte' : cards.find(c => c.id === selectedCard)?.name}
+                            Riepilogo {selectedCard === 'all' ? 'Tutte le Carte' : cards?.cards.find(c => c.id === selectedCard)?.name}
                         </Typography>
                         <Typography variant="body1" color="text.secondary">
                             Spese totali: €{getTotalExpenses().toFixed(2)}
@@ -166,7 +225,7 @@ const Expenses: React.FC = () => {
                     {selectedCard !== 'all' && (
                         <Card>
                             <CardHeader title={<Typography variant="h6">
-                                Aggiungi Spesa a {cards.find(c => c.id === selectedCard)?.name}
+                                Aggiungi Spesa a {cards?.cards.find(c => c.id === selectedCard)?.name}
                             </Typography>} />
                             <Divider />
                             <CardContent>
@@ -215,66 +274,94 @@ const Expenses: React.FC = () => {
                         </Card>
                     )}
 
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>Descrizione</TableCell>
-                                    <TableCell align="center">Categoria</TableCell>
-                                    <TableCell align="right">Importo (€)</TableCell>
-                                    <TableCell align="center">Data</TableCell>
-                                    {selectedCard === 'all' && <TableCell align="center">Carta</TableCell>}
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {getDisplayedExpenses().map((expense: Expense) => (
-                                    <TableRow key={expense.id}>
-                                        <TableCell>{expense.description}</TableCell>
-                                        <TableCell align="center">{expense.category}</TableCell>
-                                        <TableCell align="right">€{expense.amount.toFixed(2)}</TableCell>
-                                        <TableCell align="center">{expense.date}</TableCell>
-                                        {selectedCard === 'all' && (
-                                            <TableCell align="center">
-                                                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
-                                                    {Object.entries(allExpenses).map(([cardId, cardExpenses]) => {
-                                                        const card = cards.find(c => c.id === cardId);
-                                                        if (cardExpenses.some(e => e.id === expense.id) && card) {
-                                                            return (
-                                                                <Box key={cardId} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                                                    <Box
-                                                                        sx={{
-                                                                            width: 8,
-                                                                            height: 8,
-                                                                            borderRadius: '50%',
-                                                                            backgroundColor: card.color
-                                                                        }}
-                                                                    />
-                                                                    <Typography variant="body2">{card.name}</Typography>
-                                                                </Box>
-                                                            );
-                                                        }
-                                                        return null;
-                                                    })}
-                                                </Box>
-                                            </TableCell>
-                                        )}
-                                    </TableRow>
-                                ))}
-                                {getDisplayedExpenses().length === 0 && (
+                    {<TableContainer component={Paper}>
+                        <Stack direction={'column'} spacing={2} sx={{ p: 2 }}>
+                            <Table>
+                                <TableHead>
                                     <TableRow>
-                                        <TableCell colSpan={selectedCard === 'all' ? 5 : 4} align="center" sx={{ py: 4 }}>
-                                            <Typography color="text.secondary">
-                                                Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards.find(c => c.id === selectedCard)?.name}
-                                            </Typography>
+                                        <TableCell padding="checkbox">
+                                            {getTotalExpenses() > 0 && !loading && !error && <Checkbox
+                                                disabled={getTotalExpenses() === 0 && loading && !!error}
+                                                indeterminate={selectedIds?.length > 0 && selectedIds?.length < expenses?.expenses?.length!}
+                                                checked={expenses?.expenses?.length! > 0 && selectedIds?.length === expenses?.expenses?.length}
+                                                onChange={handleSelectAll}
+                                            />}
                                         </TableCell>
+                                        <TableCell>Descrizione</TableCell>
+                                        <TableCell align="center">Categoria</TableCell>
+                                        <TableCell align="right">Importo (€)</TableCell>
+                                        <TableCell align="center">Data</TableCell>
+                                        {selectedCard === 'all' && <TableCell align="center">Carta</TableCell>}
+                                        <TableCell align="right">Azioni</TableCell>
                                     </TableRow>
-                                )}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                                </TableHead>
+                                <TableBody>
+                                    {!loading && !error &&
+                                        getDisplayedExpenses().map((expense: Expense) => (
+                                            <TableRow key={expense.id}>
+                                                <TableCell padding="checkbox">
+                                                    <Checkbox
+                                                        checked={selectedIds.includes(expense.id ?? '')}
+                                                        onChange={() => handleSelect(expense.id ?? '')}
+                                                    />
+                                                </TableCell>
+                                                <TableCell>{expense.description}</TableCell>
+                                                <TableCell align="center">{expense.category}</TableCell>
+                                                <TableCell align="right">€{expense.amount.toFixed(2)}</TableCell>
+                                                <TableCell align="center">{expense.date}</TableCell>
+                                                {selectedCard === 'all' && (
+                                                    <TableCell align="center">
+                                                        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                                                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                                                <Box
+                                                                    sx={{
+                                                                        width: 8,
+                                                                        height: 8,
+                                                                        borderRadius: '50%',
+                                                                        backgroundColor: cards?.cards.find(c => c.id === expense.card_id)?.color
+                                                                    }}
+                                                                />
+                                                                <Typography variant="body2">{cards?.cards.find(c => c.id === expense.card_id)?.name}</Typography>
+                                                            </Box>
+                                                        </Box>
+                                                    </TableCell>
+                                                )}
+                                                <TableCell align="right">
+                                                    <IconButton onClick={() => handleDeleteExpense(expense.id)}>
+                                                        <Delete />
+                                                    </IconButton>
+                                                </TableCell>
+                                            </TableRow>
+                                        ))
+                                    }
+                                    {getDisplayedExpenses().length === 0 && (
+                                        <TableRow>
+                                            <TableCell colSpan={selectedCard === 'all' ? 5 : 4} align="center" sx={{ py: 4 }}>
+                                                <Typography color="text.secondary">
+                                                    Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find(c => c.id === selectedCard)?.name}
+                                                </Typography>
+                                            </TableCell>
+                                        </TableRow>
+                                    )}
+                                </TableBody>
+                            </Table>
+                            {selectedIds.length > 0 && (
+                                <ButtonGroup>
+                                    <Button
+                                        size='small'
+                                        color="error"
+                                        onClick={handleDeleteSelected}
+                                        disabled={selectedIds.length === 0}
+                                    >
+                                        Elimina
+                                    </Button>
+                                </ButtonGroup>
+                            )}
+                        </Stack>
+                    </TableContainer>}
                 </Stack>
             </CardContent>
-        </Card>
+        </Card >
     );
 };
 
