@@ -2,9 +2,14 @@ name: CI
 
 on:
 	push:
-		branches: [ main, feat/**, fix/**, hotfix/** ]
+		branches:
+			- main
+			- feat/**
+			- fix/**
+			- hotfix/**
 	pull_request:
-		branches: [ main ]
+		branches:
+			- main
 
 concurrency:
 	group: ${{ github.workflow }}-${{ github.ref }}
@@ -38,6 +43,7 @@ jobs:
 					wait-on: 'http://localhost:5173'
 					config-file: cypress.config.cjs
 					browser: electron
+
 			- name: Upload Cypress videos
 				if: always()
 				uses: actions/upload-artifact@v4
