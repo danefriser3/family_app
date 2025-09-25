@@ -31,10 +31,9 @@ import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
 import { Delete, Sync } from '@mui/icons-material';
-import { Expense as Income } from '../types';
+import { Expense as Income, formatDateYYYYMMDDLocal } from '../types';
 import { Card as CardType } from '../types/graphql';
 import { GetCardsData } from './Expenses';
-import { formatDateYYYYMMDDLocal } from '../types';
 
 export interface GetIncomesData {
     incomes: Income[];
@@ -44,7 +43,7 @@ const Incomes = () => {
   const [selectedCard, setSelectedCard] = useState<string>('all');
   const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
   const { data: incomes, refetch, loading, error } = useQuery<GetIncomesData>(GET_INCOMES, {
-    variables: { cardId: selectedCard !== 'all' ? selectedCard : undefined },
+    variables: { cardId: selectedCard === 'all' ? undefined : selectedCard },
     fetchPolicy: 'network-only'
   });
   const [addIncome] = useMutation(ADD_INCOME);
@@ -61,7 +60,7 @@ const Incomes = () => {
   const [startDate, setStartDate] = useState('');
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
-  const selectedCardObj = selectedCard !== 'all' ? cards?.cards.find(c => c.id === selectedCard) : undefined;
+  const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find(c => c.id === selectedCard);
 
   useEffect(() => {
     setCredito(String(selectedCardObj?.credito_iniziale ?? ''));
@@ -101,7 +100,7 @@ const Incomes = () => {
           amount: Number(amount),
           category,
           date,
-          card_id: selectedCard !== 'all' ? selectedCard : undefined
+          card_id: selectedCard === 'all' ? undefined : selectedCard
         }
       }
     });
