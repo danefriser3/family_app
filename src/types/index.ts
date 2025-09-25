@@ -13,7 +13,7 @@ export interface StatCardData {
 export interface TableColumn {
   id: string;
   label: string;
-  format?: (value: any) => React.ReactNode;
+  format?: (value: unknown) => React.ReactNode;
 }
 
 export interface User {
@@ -65,7 +65,7 @@ export interface MenuItem {
 
 export interface DataTableProps {
   title: string;
-  data: any[];
+  data: Record<string, unknown>[];
   columns: TableColumn[];
 }
 

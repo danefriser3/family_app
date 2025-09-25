@@ -44,7 +44,9 @@ export const DataTable: React.FC<DataTableProps> = ({ title, data, columns }) =>
             </TableHead>
             <TableBody>
               {data.map((row, index) => {
-                const rowKey = row.id ?? columns.map((col) => row[col.id]).join('-') ?? index;
+                const idVal = (row as { id?: string | number }).id;
+                const fallbackKey = columns.map((col) => String(row[col.id])).join('|');
+                const rowKey = idVal == null ? (fallbackKey || String(index)) : String(idVal);
                 return (
                   <TableRow
                     key={rowKey}
@@ -52,7 +54,7 @@ export const DataTable: React.FC<DataTableProps> = ({ title, data, columns }) =>
                   >
                     {columns.map((column) => (
                       <TableCell key={column.id}>
-                        {column.format ? column.format(row[column.id]) : row[column.id]}
+                        {column.format ? column.format(row[column.id]) : (row[column.id] as React.ReactNode)}
                       </TableCell>
                     ))}
                   </TableRow>
