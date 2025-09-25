@@ -53,7 +53,7 @@ export const StatCard: React.FC<StatCardData> = ({
           </Box>
           <Avatar
             className={`${colorClasses[color]} text-white w-16 h-16`}
-            sx={{ bgcolor: 'transparent' }}
+            sx={{ bgcolor: color }}
           >
             {icon}
           </Avatar>

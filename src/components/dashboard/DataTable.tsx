@@ -43,18 +43,21 @@ export const DataTable: React.FC<DataTableProps> = ({ title, data, columns }) =>
               </TableRow>
             </TableHead>
             <TableBody>
-              {data.map((row, index) => (
-                <TableRow
-                  key={index}
-                  className="hover:bg-gray-50 transition-colors duration-200"
-                >
-                  {columns.map((column) => (
-                    <TableCell key={column.id}>
-                      {column.format ? column.format(row[column.id]) : row[column.id]}
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
+              {data.map((row, index) => {
+                const rowKey = row.id ?? columns.map((col) => row[col.id]).join('-') ?? index;
+                return (
+                  <TableRow
+                    key={rowKey}
+                    className="hover:bg-gray-50 transition-colors duration-200"
+                  >
+                    {columns.map((column) => (
+                      <TableCell key={column.id}>
+                        {column.format ? column.format(row[column.id]) : row[column.id]}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

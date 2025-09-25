@@ -1,54 +1,27 @@
 import React from 'react';
 import { Typography, Box, Card, CardContent, LinearProgress, Chip } from '@mui/material';
 import {
-  People as PeopleIcon,
-  AttachMoney as AttachMoneyIcon,
-  ShoppingCart as ShoppingCartIcon,
-  TrendingUp as TrendingUpIcon,
+    AttachMoney as AttachMoneyIcon,
+    ShoppingCart as ShoppingCartIcon,
+    Money,
 } from '@mui/icons-material';
 import { StatCard } from '../components/dashboard/StatCard';
 import { DataTable } from '../components/dashboard/DataTable';
-import { StatCardData, User, TableColumn } from '../types';
-import { gql } from '@apollo/client';
+import { StatCardData, User, TableColumn, Expense } from '../types';
 import { useQuery } from '@apollo/client/react';
+import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
+import { Card as CardType } from '../types/graphql';
 
-const HELLO_QUERY = gql`
-  query Hi {
-    hello
-  }
-`;
-
-// Dati di esempio
-const statsData: StatCardData[] = [
-    {
-        title: 'Utenti Totali',
-        value: '2,847',
-        change: 12.5,
-        icon: <PeopleIcon />,
-        color: 'primary',
-    },
-    {
-        title: 'Vendite Mensili',
-        value: '€24,500',
-        change: 8.2,
-        icon: <AttachMoneyIcon />,
-        color: 'success',
-    },
-    {
-        title: 'Ordini',
-        value: '1,423',
-        change: -2.1,
-        icon: <ShoppingCartIcon />,
-        color: 'warning',
-    },
-    {
-        title: 'Crescita',
-        value: '+15.3%',
-        change: 5.4,
-        icon: <TrendingUpIcon />,
-        color: 'secondary',
-    },
-];
+const useTotals = () => {
+    const { data: expensesData } = useQuery<{ expenses: Expense[] }>(GET_EXPENSES, { variables: { cardId: null } });
+    const { data: incomesData } = useQuery<{ incomes: Expense[] }>(GET_INCOMES, { variables: { cardId: null } });
+    const { data: cardsData } = useQuery<{ cards: CardType[] }>(GET_CARDS, { variables: {} });
+    const totalExpenses = expensesData?.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
+    const totalIncomes = incomesData?.incomes?.reduce((sum, i) => sum + (i.amount || 0), 0) || 0;
+    const totalCreditoIniziale = cardsData?.cards?.reduce((sum, c) => sum + (c.credito_iniziale || 0), 0) || 0;
+    const totalCreditoAttuale = totalCreditoIniziale + totalIncomes - totalExpenses;
+    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale };
+};
 
 const recentUsers: User[] = [
     {
@@ -103,13 +76,30 @@ const tableColumns: TableColumn[] = [
     { id: 'lastLogin', label: 'Ultimo Accesso' },
 ];
 
-type HelloQueryData = {
-    hello: string;
-};
 
 export const Dashboard: React.FC = () => {
+    const { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale } = useTotals();
 
-    const { data } = useQuery<HelloQueryData>(HELLO_QUERY);
+    const statsData: StatCardData[] = [
+        {
+            title: 'Credito totale',
+            value: `€ ${totalCreditoAttuale.toLocaleString('it-IT', { minimumFractionDigits: 2 })}`,
+            icon: <Money />, // puoi cambiare icona se vuoi
+            color: 'error',
+        },
+        {
+            title: 'Totale Spese',
+            value: `€ ${totalExpenses.toLocaleString('it-IT', { minimumFractionDigits: 2 })}`,
+            icon: <ShoppingCartIcon />, // puoi cambiare icona se vuoi
+            color: 'error',
+        },
+        {
+            title: 'Totale Entrate',
+            value: `€ ${totalIncomes.toLocaleString('it-IT', { minimumFractionDigits: 2 })}`,
+            icon: <AttachMoneyIcon />,
+            color: 'success',
+        },
+    ];
 
     return (
         <Box sx={{
@@ -120,7 +110,7 @@ export const Dashboard: React.FC = () => {
             <Card>
                 <CardContent className="!p-4">
                     <Typography variant="h4" className="font-bold text-gray-800">
-                        Dashboard Overview {data ? data.hello : ''}
+                        Dashboard Overview
                     </Typography>
                 </CardContent>
             </Card>
@@ -138,7 +128,7 @@ export const Dashboard: React.FC = () => {
                 }}
             >
                 {statsData.map((stat, index) => (
-                    <StatCard key={index} {...stat} />
+                    <StatCard key={stat.title + '-' + index} {...stat} />
                 ))}
             </Box>
 

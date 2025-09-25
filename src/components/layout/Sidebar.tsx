@@ -19,6 +19,7 @@ import {
   Assessment as AssessmentIcon,
   Inventory as InventoryIcon,
   AccountCircle as AccountCircleIcon,
+  AttachMoney as AttachMoneyIcon,
 } from '@mui/icons-material';
 import { SidebarProps, MenuItem } from '../../types';
 
@@ -27,6 +28,7 @@ const drawerWidth = 240;
 const menuItems: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { id: 'expenses', label: 'Spese', icon: <BarChartIcon /> },
+  { id: 'incomes', label: 'Entrate', icon: <AttachMoneyIcon /> },
   { id: 'users', label: 'Utenti', icon: <PeopleIcon /> },
   { id: 'inventory', label: 'Inventario', icon: <InventoryIcon /> },
   { id: 'reports', label: 'Report', icon: <AssessmentIcon /> },

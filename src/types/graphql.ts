@@ -8,6 +8,8 @@ export interface Card {
   id: string;
   name: string;
   color: string;
+  credito_iniziale: number;
+  start_date: string;
 }
 
 export interface Expense {

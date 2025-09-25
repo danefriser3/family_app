@@ -1,3 +1,43 @@
+export const UPDATE_CARD = gql`
+  mutation UpdateCard($id: ID!, $input: CardUpdateInput!) {
+    updateCard(id: $id, input: $input) {
+      id
+      name
+      color
+      credito_iniziale
+      start_date
+    }
+  }
+`;
+export const ADD_INCOME = gql`
+  mutation AddIncome($incomeInput: IncomeInput!) {
+    addIncome(incomeInput: $incomeInput) {
+      id
+      description
+      amount
+      date
+      category
+      card_id
+    }
+  }
+`;
+
+export const DELETE_INCOME = gql`
+  mutation DeleteIncome($id: ID!) {
+    deleteIncome(id: $id) {
+      id
+    }
+  }
+`;
+
+export const DELETE_INCOMES = gql`
+  mutation DeleteIncomes($ids: [ID!]!) {
+    deleteIncomes(ids: $ids) {
+      id
+    }
+  }
+`;
+
 import { gql } from '@apollo/client';
 
 export const ADD_EXPENSE = gql`
@@ -9,6 +49,17 @@ export const ADD_EXPENSE = gql`
       date
       category
       card_id
+    }
+  }
+`;
+
+export const ADD_EXPENSE_PRODUCT = gql`
+  mutation AddExpenseProduct($expenseId: ID!, $product: ExpenseProductInput!) {
+    addExpenseProduct(expenseId: $expenseId, product: $product) {
+      id
+      name
+      quantity
+      price
     }
   }
 `;

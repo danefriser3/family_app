@@ -6,6 +6,7 @@ import { Layout } from './components/layout/Layout';
 import { Dashboard } from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import { TabType } from './types';
+import Incomes from './pages/Incomes';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -20,6 +21,8 @@ function App() {
         return <Dashboard />;
       case 'expenses':
         return <Expenses />;
+      case 'incomes':
+        return <Incomes />;
       case 'users':
         return <div className="p-8 text-center text-gray-500">Gestione Utenti - In sviluppo</div>;
       case 'inventory':

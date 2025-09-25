@@ -124,4 +124,30 @@ export type TabType =
   | 'reports' 
   | 'profile' 
   | 'settings'
-  | 'expenses';
+  | 'expenses'
+  | 'incomes';
+
+// ========================
+// CARD TYPES
+// ========================
+
+export interface Card {
+  id: string;
+  name: string;
+  color: string;
+  credito_iniziale?: number;
+  start_date?: string;
+}
+
+// ========================
+// DATE UTILS
+// ========================
+
+export function formatDateYYYYMMDDLocal(dateValue: string | number | Date | undefined): string {
+  if (!dateValue) return '';
+  const d = new Date(Number(dateValue));
+  const year = d.getFullYear();
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}

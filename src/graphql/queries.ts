@@ -1,5 +1,29 @@
 import { gql } from '@apollo/client';
 
+export const GET_INCOMES = gql`
+  query Incomes($cardId: ID) {
+    incomes(card_id: $cardId) {
+      id
+      description
+      amount
+      date
+      category
+      card_id
+    }
+  }
+`;
+
+export const GET_EXPENSE_PRODUCTS = gql`
+  query ExpenseProducts($expenseId: ID!) {
+    expenseProducts(expenseId: $expenseId) {
+      id
+      name
+      quantity
+      price
+    }
+  }
+`;
+
 export const GET_USERS = gql`
   query {
     users {
@@ -16,6 +40,8 @@ export const GET_CARDS = gql`
       id
       name
       color
+      credito_iniziale
+      start_date
     }
   }
 `;
