@@ -39,7 +39,7 @@ export const StatCard: React.FC<StatCardData> = ({
             <Typography variant="h4" className="font-bold text-gray-800 mt-1">
               {value}
             </Typography>
-            {change !== undefined && (
+            {change === undefined ? null : (
               <Box className="flex items-center mt-2">
                 {isPositive ? (
                   <TrendingUp className="text-green-500 mr-1" fontSize="small" />

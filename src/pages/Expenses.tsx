@@ -1,6 +1,6 @@
 import ExpandedExpenseRow from '../components/dashboard/ExpandedExpenseRow';
 import React, { useEffect, useState } from 'react';
-import { Expense } from '../types';
+import { Expense, formatDateYYYYMMDDLocal } from '../types';
 import {
     Box,
     Button,
@@ -34,7 +34,6 @@ import { GET_CARDS, GET_EXPENSES } from '../graphql/queries';
 import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
 import { Sync } from '@mui/icons-material';
 import { Card as CardType } from '../types/graphql';
-import { formatDateYYYYMMDDLocal } from '../types';
 export interface GetCardsData {
     cards: CardType[];
 }
