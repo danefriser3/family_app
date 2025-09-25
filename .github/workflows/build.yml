@@ -27,6 +27,13 @@ jobs:
         name: Run Cypress Tests
 
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        if: ${{ secrets.SONARCLOUD_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
