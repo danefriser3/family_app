@@ -19,11 +19,11 @@ jobs:
         with:
           node-version: '22.17.1'
       - uses: browser-actions/setup-chromium@v1
-      - run: npm install --frozen-lockfile
+      - run: yarn install
         name: Fetch Dependencies
-      - run: npm run dev &
+      - run: yarn dev &
         name: Start Application
-      - run: npx cypress run --headless --browser chrome
+      - run: yarn cy:run --headless --browser chrome
         name: Run Cypress Tests
 
       - name: Generate lcov from coverage
