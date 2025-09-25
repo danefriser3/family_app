@@ -156,7 +156,7 @@ const Expenses: React.FC = () => {
     }
 
     // Stato per modifica carta selezionata
-    const selectedCardObj = selectedCard !== 'all' ? cards?.cards.find(c => c.id === selectedCard) : undefined;
+    const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find(c => c.id === selectedCard);
     const [credito, setCredito] = useState('');
     const [startDate, setStartDate] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
