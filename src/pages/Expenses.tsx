@@ -27,7 +27,7 @@ import {
     Checkbox,
     ButtonGroup,
     Snackbar,
-    Alert,
+    Alert
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES } from '../graphql/queries';
@@ -143,7 +143,7 @@ const Expenses: React.FC = () => {
         }
     };
 
-    function handleDeleteSelected(_: React.MouseEvent<HTMLButtonElement, MouseEvent>): void {
+    function handleDeleteSelected(): void {
         // Delete all selected expenses
         const idsToDelete = selectedIds;
         if (idsToDelete.length === 0) return;
@@ -334,8 +334,8 @@ const Expenses: React.FC = () => {
                                         <TableCell padding="checkbox">
                                             {getTotalExpenses() > 0 && !loading && !error && <Checkbox
                                                 disabled={getTotalExpenses() === 0 && loading && !!error}
-                                                indeterminate={selectedIds?.length > 0 && selectedIds?.length < expenses?.expenses?.length!}
-                                                checked={expenses?.expenses?.length! > 0 && selectedIds?.length === expenses?.expenses?.length}
+                                                indeterminate={selectedIds.length > 0 && selectedIds.length < ((expenses?.expenses?.length) ?? 0)}
+                                                checked={((expenses?.expenses?.length) ?? 0) > 0 && selectedIds.length === ((expenses?.expenses?.length) ?? 0)}
                                                 onChange={handleSelectAll}
                                             />}
                                         </TableCell>

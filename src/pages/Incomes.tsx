@@ -1,5 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { Box, Button, Paper, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TextField, Typography, Stack, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Card, CardHeader, CardContent, Divider, IconButton, Checkbox, ButtonGroup, Snackbar, Alert } from '@mui/material';
+import {
+  Box,
+  Button,
+  Paper,
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  TextField,
+  Typography,
+  Stack,
+  FormControl,
+  InputLabel,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
+  Card,
+  CardHeader,
+  CardContent,
+  Divider,
+  IconButton,
+  Checkbox,
+  ButtonGroup,
+  Snackbar,
+  Alert
+} from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
@@ -274,8 +301,8 @@ const Incomes = () => {
                     <TableCell padding="checkbox">
                       {getTotalIncomes() > 0 && !loading && !error && <Checkbox
                         disabled={getTotalIncomes() === 0 && loading && !!error}
-                        indeterminate={selectedIds?.length > 0 && selectedIds?.length < incomes?.incomes?.length!}
-                        checked={incomes?.incomes?.length! > 0 && selectedIds?.length === incomes?.incomes?.length}
+                        indeterminate={selectedIds.length > 0 && selectedIds.length < ((incomes?.incomes?.length) ?? 0)}
+                        checked={((incomes?.incomes?.length) ?? 0) > 0 && selectedIds.length === ((incomes?.incomes?.length) ?? 0)}
                         onChange={handleSelectAll}
                       />}
                     </TableCell>

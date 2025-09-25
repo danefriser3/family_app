@@ -1,6 +1,15 @@
 import React from 'react';
-import { Card, CardContent, Typography, Box, Avatar } from '@mui/material';
-import { TrendingUp, TrendingDown } from '@mui/icons-material';
+import {
+  Card,
+  CardContent,
+  Typography,
+  Box,
+  Avatar,
+} from '@mui/material';
+import {
+  TrendingUp,
+  TrendingDown
+} from '@mui/icons-material';
 import { StatCardData } from '../../types';
 
 export const StatCard: React.FC<StatCardData> = ({

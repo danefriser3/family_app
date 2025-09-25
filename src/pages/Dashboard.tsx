@@ -1,5 +1,12 @@
 import React from 'react';
-import { Typography, Box, Card, CardContent, LinearProgress, Chip } from '@mui/material';
+import {
+  Typography,
+  Box,
+  Card,
+  CardContent,
+  LinearProgress,
+  Chip
+} from '@mui/material';
 import {
     AttachMoney as AttachMoneyIcon,
     ShoppingCart as ShoppingCartIcon,
@@ -78,7 +85,7 @@ const tableColumns: TableColumn[] = [
 
 
 export const Dashboard: React.FC = () => {
-    const { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale } = useTotals();
+    const { totalExpenses, totalIncomes, totalCreditoAttuale } = useTotals();
 
     const statsData: StatCardData[] = [
         {

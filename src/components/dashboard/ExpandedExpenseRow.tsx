@@ -19,16 +19,32 @@ import {
   CardHeader,
   CardContent,
   Stack,
-  Divider
+  Divider,
+  Checkbox,
+  IconButton
 } from '@mui/material';
-const slideTransition = (props: any) => (
-  <Slide {...props} direction="left" />
-);
+import {
+  Add,
+  Delete,
+  Remove
+} from '@mui/icons-material';
 import { Expense } from '../../types';
 
+// Tipi per prodotti associati alle spese
+interface ExpenseProduct {
+  id: string;
+  name: string;
+  quantity: number;
+  price: number;
+}
+interface GetExpenseProductsData {
+  expenseProducts: ExpenseProduct[];
+}
 
-import { Checkbox, IconButton } from '@mui/material';
-import { Add, Delete, Remove } from '@mui/icons-material';
+// Transizione Snackbar con tipo props derivato dal componente Slide
+const slideTransition = (props: React.ComponentProps<typeof Slide>) => (
+  <Slide {...props} direction="left" />
+);
 
 interface Card {
   id: string;
@@ -49,10 +65,10 @@ interface ExpandedExpenseRowProps {
 
 const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, selectedCard, expanded, selected, onSelect, onDelete, onExpand, cards }) => {
   const colSpan = selectedCard === 'all' ? 7 : 6;
-  const [products, setProducts] = useState<any[]>([]);
-  const [newProduct, setNewProduct] = useState({ name: '', quantity: 1, price: 0 });
+  const [products, setProducts] = useState<ExpenseProduct[]>([]);
+  const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price'>>({ name: '', quantity: 1, price: 0 });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [getExpenseProducts, { data: productsData, loading: loadingProducts }] = useLazyQuery(GET_EXPENSE_PRODUCTS, { fetchPolicy: 'network-only' });
+  const [getExpenseProducts, { data: productsData, loading: loadingProducts }] = useLazyQuery<GetExpenseProductsData>(GET_EXPENSE_PRODUCTS, { fetchPolicy: 'network-only' });
   const [addExpenseProduct] = useMutation(ADD_EXPENSE_PRODUCT);
   const [showAddProduct, setShowAddProduct] = useState(false);
 
@@ -69,16 +85,15 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
   }, [expanded, expense.id]);
 
   useEffect(() => {
-    const data = productsData as any;
-    if (data && data.expenseProducts) {
-      setProducts(data.expenseProducts);
+    if (productsData && productsData.expenseProducts) {
+      setProducts(productsData.expenseProducts);
     }
   }, [productsData]);
 
   const handleAddProduct = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.quantity || !newProduct.price) return;
-    const totalProducts = products.reduce((sum: number, prod: any) => sum + Number(prod.price), 0);
+    const totalProducts = products.reduce((sum: number, prod: ExpenseProduct) => sum + Number(prod.price), 0);
     const newTotal = totalProducts + Number(newProduct.price);
     if (expense && newTotal > expense.amount) {
       setSnackbarOpen(true);
@@ -247,7 +262,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             </TableRow>
                           </TableHead>
                           <TableBody>
-                            {products.map((prod: any) => (
+                            {products.map((prod: ExpenseProduct) => (
                               <TableRow key={prod.id}>
                                 <TableCell>{prod.name}</TableCell>
                                 <TableCell>{prod.quantity}</TableCell>
