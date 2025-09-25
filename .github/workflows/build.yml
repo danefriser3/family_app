@@ -1,26 +1,63 @@
 name: Build
+
 on:
- push:
-   branches:
-     - main
-     - develop
-     - feat/*
-     - fix/*
- pull_request:
-   types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - develop
+      - "feat/*"
+      - "fix/*"
+  pull_request:
+    types: [opened, synchronize, reopened]
+
 jobs:
-  sonarqube:
-    name: SonarQube
+  e2e:
+    name: Cypress E2E
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          fetch-depth: 0 
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
       - name: Install dependencies
-        run: yarn
-      - name: Test and coverage
-        run: yarn jest --coverage
+        run: npm ci
+
+      - name: Run Cypress E2E
+        uses: cypress-io/github-action@v6
+        with:
+          start: npm run dev
+          wait-on: 'http://localhost:5173'
+          config-file: cypress.config.cjs
+          browser: electron
+          install: false
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos/**/*.mp4
+          if-no-files-found: ignore
+
+      - name: Upload Cypress screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/**/*
+          if-no-files-found: ignore
+
       - name: SonarQube Scan
+        if: ${{ secrets.SONARCLOUD_TOKEN }}
         uses: SonarSource/sonarqube-scan-action@v5
         env:
-          SONAR_TOKEN: ${{ secrets. SONARCLOUD_TOKEN }}
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          # If using a self-hosted SonarQube server, also set SONAR_HOST_URL
+          # SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
