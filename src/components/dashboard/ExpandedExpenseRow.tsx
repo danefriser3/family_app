@@ -41,10 +41,7 @@ interface GetExpenseProductsData {
   expenseProducts: ExpenseProduct[];
 }
 
-// Transizione Snackbar con tipo props derivato dal componente Slide
-const slideTransition = (props: React.ComponentProps<typeof Slide>) => (
-  <Slide {...props} direction="left" />
-);
+// Nessuna funzione wrapper: usiamo slots/slotProps direttamente su Snackbar
 
 interface Card {
   id: string;
@@ -127,7 +124,8 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
         autoHideDuration={4000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-        TransitionComponent={slideTransition}
+        slots={{ transition: Slide }}
+        slotProps={{ transition: { direction: 'left' }}}
       >
         <Alert severity="warning" onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
           Il totale dei prodotti supera il prezzo della spesa!
@@ -216,26 +214,21 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                               type="number"
                               required
                               name="quantity"
-                              inputProps={{ min: 1 }}
                               value={newProduct.quantity}
                               onChange={e => setNewProduct(p => ({ ...p, quantity: Number(e.target.value) }))}
                               fullWidth
                               sx={{ flexGrow: 1 }}
                             />
                             <TextField
-                              label="Prezzo"
+                              label="Prezzo (€)"
                               size="small"
                               type="number"
                               required
                               name="price"
-                              inputProps={{ min: 0, step: 0.01 }}
                               value={newProduct.price}
                               onChange={e => setNewProduct(p => ({ ...p, price: Number(e.target.value) }))}
                               fullWidth
                               sx={{ flexGrow: 1 }}
-                              InputProps={{
-                                endAdornment: <span style={{ marginRight: 4 }}>€</span>
-                              }}
                             />
                             <Button
                               type="submit"

@@ -82,8 +82,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange }) => {
               </ListItemIcon>
               <ListItemText 
                 primary={item.label}
-                primaryTypographyProps={{
-                  fontWeight: activeTab === item.id ? 600 : 400,
+                slotProps={{
+                  primary: {
+                    sx: { fontWeight: activeTab === item.id ? 600 : 400 }
+                  }
                 }}
               />
             </ListItemButton>

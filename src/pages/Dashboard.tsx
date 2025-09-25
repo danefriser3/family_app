@@ -14,7 +14,7 @@ import {
 } from '@mui/icons-material';
 import { StatCard } from '../components/dashboard/StatCard';
 import { DataTable } from '../components/dashboard/DataTable';
-import { StatCardData, User, TableColumn, Expense } from '../types';
+import { StatCardData, TableColumn, Expense, User } from '../types';
 import { useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { Card as CardType } from '../types/graphql';
@@ -71,13 +71,16 @@ const tableColumns: TableColumn[] = [
     {
         id: 'status',
         label: 'Status',
-        format: (value: string) => (
+        format: (value) => {
+            const v = String(value);
+            return (
             <Chip
-                label={value}
-                color={value === 'Attivo' ? 'success' : 'default'}
+                label={v}
+                color={v === 'Attivo' ? 'success' : 'default'}
                 size="small"
             />
-        ),
+            );
+        },
     },
     { id: 'role', label: 'Ruolo' },
     { id: 'lastLogin', label: 'Ultimo Accesso' },
@@ -154,7 +157,7 @@ export const Dashboard: React.FC = () => {
                 <Box>
                     <DataTable
                         title="Utenti Recenti"
-                        data={recentUsers}
+                        data={recentUsers as unknown as Record<string, unknown>[]}
                         columns={tableColumns}
                     />
                 </Box>
