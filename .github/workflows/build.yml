@@ -27,7 +27,6 @@ jobs:
         name: Run Cypress Tests
 
       - name: SonarQube Scan
-        if: ${{ secrets.SONARCLOUD_TOKEN }}
         uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
