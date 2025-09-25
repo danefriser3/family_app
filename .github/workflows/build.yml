@@ -26,6 +26,10 @@ jobs:
       - run: npx cypress run --headless --browser chrome
         name: Run Cypress Tests
 
+      - name: Generate lcov from coverage
+        if: always()
+        run: npx nyc report --reporter=lcov --report-dir=coverage
+
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
         env:
@@ -36,3 +40,4 @@ jobs:
             -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
             -Dsonar.sources=src
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
