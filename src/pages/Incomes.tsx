@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import {
-  Box,
   Button,
   Paper,
   Table,
@@ -9,31 +8,26 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  TextField,
+  IconButton,
   Typography,
   Stack,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
   Card,
   CardHeader,
   CardContent,
   Divider,
-  IconButton,
   Checkbox,
-  ButtonGroup,
-  Snackbar,
-  Alert
+  ButtonGroup
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
-import { Delete, Sync } from '@mui/icons-material';
+import { Delete } from '@mui/icons-material';
 import { Expense as Income, formatDateYYYYMMDDLocal } from '../types';
 import { Card as CardType } from '../types/graphql';
 import { GetCardsData } from './Expenses';
+import CardSelector from '../components/common/CardSelector';
+import CardEditorControls from '../components/common/CardEditorControls';
+import AddTransactionForm from '../components/common/AddTransactionForm';
 
 export interface GetIncomesData {
     incomes: Income[];
@@ -67,9 +61,17 @@ const Incomes = () => {
     setStartDate(formatDateYYYYMMDDLocal(selectedCardObj?.start_date));
   }, [selectedCardObj]);
 
-  const handleCardChange = (event: SelectChangeEvent<string>) => {
-    setSelectedCard(event.target.value);
+  const onCardChange = (value: string) => {
+    setSelectedCard(value);
+    // Clear selections and form fields on card change to avoid stale UI
     setSelectedIds([]);
+    setDescription('');
+    setAmount('');
+    setCategory('');
+    setDate('');
+    // Reset editor fields to avoid stale values until the new card data loads
+    setCredito('');
+    setStartDate('');
   };
 
   const handleSelect = (id: string) => {
@@ -142,50 +144,12 @@ const Incomes = () => {
       <CardContent>
         <Stack direction="column" spacing={3}>
           <Stack direction="row">
-            <FormControl fullWidth sx={{ maxWidth: 300 }}>
-              <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
-              <Select
-                labelId="card-select-label"
-                value={selectedCard}
-                onChange={handleCardChange}
-                label="Seleziona Carta"
-                size="small"
-              >
-                <MenuItem value="all">
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Box
-                      sx={{
-                        width: 12,
-                        height: 12,
-                        borderRadius: '50%',
-                        background: 'linear-gradient(45deg, #1976d2, #388e3c, #f57c00)'
-                      }}
-                    />
-                    Tutte le Carte
-                  </Box>
-                </MenuItem>
-                {cards?.cards.map((card: CardType) => (
-                  <MenuItem key={card.id} value={card.id}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Box
-                        sx={{
-                          width: 12,
-                          height: 12,
-                          borderRadius: '50%',
-                          backgroundColor: card.color
-                        }}
-                      />
-                      {card.name}
-                    </Box>
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <IconButton onClick={() => {
-              refetch();
-            }}>
-              <Sync />
-            </IconButton>
+            <CardSelector
+              cards={cards?.cards}
+              selectedCard={selectedCard}
+              onChange={onCardChange}
+              onRefresh={() => refetch()}
+            />
           </Stack>
 
           <Card className='p-3'>
@@ -199,97 +163,34 @@ const Incomes = () => {
               Numero entrate: {getDisplayedIncomes().length}
             </Typography>
             {selectedCardObj && (
-              <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
-                <TextField
-                  label="Credito Iniziale (€)"
-                  type="number"
-                  size="small"
-                  value={credito}
-                  onChange={e => setCredito(e.target.value)}
-                  sx={{ minWidth: 120 }}
-                />
-                <TextField
-                  label="Data Inizio"
-                  type="date"
-                  size="small"
-                  value={startDate}
-                  onChange={e => setStartDate(e.target.value)}
-                  InputLabelProps={{ shrink: true }}
-                  sx={{ minWidth: 150 }}
-                />
-                <Button
-                  variant="contained"
-                  size="small"
-                  onClick={async () => {
-                    await updateCard({ variables: { id: selectedCardObj.id, input: { credito_iniziale: Number(credito), start_date: startDate } } });
-                    setSnackbarOpen(true);
-                  }}
-                >
-                  Salva
-                </Button>
-                <Snackbar
-                  open={snackbarOpen}
-                  autoHideDuration={3000}
-                  onClose={() => setSnackbarOpen(false)}
-                  anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                >
-                  <Alert severity="success" onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
-                    Modifiche salvate!
-                  </Alert>
-                </Snackbar>
-              </Stack>
+              <CardEditorControls
+                credito={credito}
+                startDate={startDate}
+                onCreditoChange={setCredito}
+                onStartDateChange={setStartDate}
+                onSave={async () => {
+                  await updateCard({ variables: { id: selectedCardObj.id, input: { credito_iniziale: Number(credito), start_date: startDate } } });
+                  setSnackbarOpen(true);
+                }}
+                snackbarOpen={snackbarOpen}
+                setSnackbarOpen={setSnackbarOpen}
+              />
             )}
           </Card>
           {selectedCard !== 'all' && (
-            <Card>
-              <CardHeader title={<Typography variant="h6">
-                Aggiungi Entrata a {cards?.cards.find(c => c.id === selectedCard)?.name}
-              </Typography>} />
-              <Divider />
-              <CardContent>
-                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                  <TextField
-                    label="Descrizione"
-                    value={description}
-                    onChange={e => setDescription(e.target.value)}
-                    required
-                    size="small"
-                    sx={{ minWidth: 200 }}
-                  />
-                  <TextField
-                    label="Importo (€)"
-                    type="number"
-                    value={amount}
-                    onChange={e => setAmount(e.target.value)}
-                    required
-                    size="small"
-                    inputProps={{ min: 0, step: 0.01 }}
-                    sx={{ minWidth: 120 }}
-                  />
-                  <TextField
-                    label="Categoria"
-                    value={category}
-                    onChange={e => setCategory(e.target.value)}
-                    required
-                    size="small"
-                    sx={{ minWidth: 150 }}
-                  />
-                  <TextField
-                    label="Data"
-                    type="date"
-                    value={date}
-                    onChange={e => setDate(e.target.value)}
-                    required
-                    size="small"
-                    InputLabelProps={{ shrink: true }}
-                    sx={{ minWidth: 150 }}
-                  />
-                  <Button onClick={handleAddIncome} variant="contained" size="small">
-                    Aggiungi
-                  </Button>
-                </Stack>
-              </CardContent>
-            </Card>
+            <AddTransactionForm
+              title="Aggiungi Entrata"
+              cardName={cards?.cards.find(c => c.id === selectedCard)?.name}
+              description={description}
+              amount={amount}
+              category={category}
+              date={date}
+              onDescriptionChange={setDescription}
+              onAmountChange={setAmount}
+              onCategoryChange={setCategory}
+              onDateChange={setDate}
+              onSubmit={handleAddIncome}
+            />
           )}
 
           {<TableContainer component={Paper}>

@@ -2,7 +2,6 @@ import ExpandedExpenseRow from '../components/dashboard/ExpandedExpenseRow';
 import React, { useEffect, useState } from 'react';
 import { Expense, formatDateYYYYMMDDLocal } from '../types';
 import {
-    Box,
     Button,
     Paper,
     Table,
@@ -11,29 +10,22 @@ import {
     TableContainer,
     TableHead,
     TableRow,
-    TextField,
     Typography,
     Stack,
-    FormControl,
-    InputLabel,
-    Select,
-    MenuItem,
-    SelectChangeEvent,
     Card,
     CardHeader,
     CardContent,
     Divider,
-    IconButton,
     Checkbox,
-    ButtonGroup,
-    Snackbar,
-    Alert
+    ButtonGroup
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES } from '../graphql/queries';
 import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
-import { Sync } from '@mui/icons-material';
 import { Card as CardType } from '../types/graphql';
+import CardSelector from '../components/common/CardSelector';
+import CardEditorControls from '../components/common/CardEditorControls';
+import AddTransactionForm from '../components/common/AddTransactionForm';
 export interface GetCardsData {
     cards: CardType[];
 }
@@ -53,7 +45,8 @@ const Expenses: React.FC = () => {
 
     const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
     const { data: expenses, loading, error, refetch } = useQuery<GetExpensesData>(GET_EXPENSES, {
-        variables: { cardId: selectedCard === 'all' ? null : selectedCard }
+        variables: { cardId: selectedCard === 'all' ? null : selectedCard },
+        fetchPolicy: 'network-only'
     });
     const [deleteExpense] = useMutation(DELETE_EXPENSE);
 
@@ -88,10 +81,21 @@ const Expenses: React.FC = () => {
         return getDisplayedExpenses().reduce((total, expense) => total + expense.amount, 0);
     };
 
-    // Gestione cambio carta
-    const handleCardChange = (event: SelectChangeEvent) => {
-        setSelectedCard(event.target.value);
-        refetch({ cardId: event.target.value === 'all' ? null : event.target.value })
+    // Gestione cambio carta (utilizzata da CardSelector)
+    const onCardChange = (value: string) => {
+        // Aggiorna la carta selezionata; Apollo ricalcolerà la query in base alle variabili.
+        setSelectedCard(value);
+        // Pulisce selezioni e riga espansa per evitare stati incoerenti tra carte diverse.
+        setSelectedIds([]);
+        setExpandedRow(null);
+        // Pulisce i campi del form di aggiunta spesa per evitare input residui
+        setDescription('');
+        setAmount('');
+        setCategory('');
+        setDate('');
+        // Reset campi editor carta per evitare valori obsoleti fino al caricamento della nuova carta
+        setCredito('');
+        setStartDate('');
     };
 
     // Function to delete an expense by id
@@ -101,8 +105,7 @@ const Expenses: React.FC = () => {
     };
 
     // Funzione per aggiungere una nuova spesa
-    const handleAddExpense = (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleAddExpense = () => {
         if (!description || !amount || !date || !category || selectedCard === 'all') return;
 
         const newExpense: Expense = {
@@ -133,8 +136,8 @@ const Expenses: React.FC = () => {
         if (event.target.checked) {
             setSelectedIds(
                 expenses?.expenses
-                    .map((e) => e.id)
-                    .filter((id): id is string => typeof id === 'string')
+                    .map((e: Expense) => e.id)
+                    .filter((id: string | undefined): id is string => typeof id === 'string')
                 || []
             );
         } else {
@@ -156,7 +159,7 @@ const Expenses: React.FC = () => {
     }
 
     // Stato per modifica carta selezionata
-    const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find(c => c.id === selectedCard);
+    const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find((c: CardType) => c.id === selectedCard);
     const [credito, setCredito] = useState('');
     const [startDate, setStartDate] = useState('');
     const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -174,50 +177,12 @@ const Expenses: React.FC = () => {
             <CardContent>
                 <Stack direction="column" spacing={3}>
                     <Stack direction="row">
-                        <FormControl fullWidth sx={{ maxWidth: 300 }}>
-                            <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
-                            <Select
-                                labelId="card-select-label"
-                                value={selectedCard}
-                                onChange={handleCardChange}
-                                label="Seleziona Carta"
-                                size="small"
-                            >
-                                <MenuItem value="all">
-                                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                        <Box
-                                            sx={{
-                                                width: 12,
-                                                height: 12,
-                                                borderRadius: '50%',
-                                                background: 'linear-gradient(45deg, #1976d2, #388e3c, #f57c00)'
-                                            }}
-                                        />
-                                        Tutte le Carte
-                                    </Box>
-                                </MenuItem>
-                                {cards?.cards.map((card) => (
-                                    <MenuItem key={card.id} value={card.id}>
-                                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                            <Box
-                                                sx={{
-                                                    width: 12,
-                                                    height: 12,
-                                                    borderRadius: '50%',
-                                                    backgroundColor: card.color
-                                                }}
-                                            />
-                                            {card.name}
-                                        </Box>
-                                    </MenuItem>
-                                ))}
-                            </Select>
-                        </FormControl>
-                        <IconButton onClick={() => {
-                            refetch();
-                        }}>
-                            <Sync />
-                        </IconButton>
+                        <CardSelector
+                            cards={cards?.cards}
+                            selectedCard={selectedCard}
+                            onChange={onCardChange}
+                            onRefresh={() => refetch()}
+                        />
                     </Stack>
 
                     <Card className='p-3'>
@@ -231,98 +196,35 @@ const Expenses: React.FC = () => {
                             Numero spese: {getDisplayedExpenses().length}
                         </Typography>
                         {selectedCardObj && (
-                            <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2} mt={2}>
-                                <TextField
-                                    label="Credito Iniziale (€)"
-                                    type="number"
-                                    size="small"
-                                    value={credito}
-                                    onChange={e => setCredito(e.target.value)}
-                                    sx={{ minWidth: 120 }}
-                                />
-                                <TextField
-                                    label="Data Inizio"
-                                    type="date"
-                                    size="small"
-                                    value={startDate}
-                                    onChange={e => setStartDate(e.target.value)}
-                                    InputLabelProps={{ shrink: true }}
-                                    sx={{ minWidth: 150 }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    size="small"
-                                    onClick={async () => {
-                                        await updateCard({ variables: { id: selectedCardObj.id, input: { credito_iniziale: Number(credito), start_date: startDate } } });
-                                        setSnackbarOpen(true);
-                                    }}
-                                >
-                                    Salva
-                                </Button>
-                                <Snackbar
-                                    open={snackbarOpen}
-                                    autoHideDuration={3000}
-                                    onClose={() => setSnackbarOpen(false)}
-                                    anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
-                                >
-                                    <Alert severity="success" onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
-                                        Modifiche salvate!
-                                    </Alert>
-                                </Snackbar>
-                            </Stack>
+                            <CardEditorControls
+                                credito={credito}
+                                startDate={startDate}
+                                onCreditoChange={setCredito}
+                                onStartDateChange={setStartDate}
+                                onSave={async () => {
+                                    await updateCard({ variables: { id: selectedCardObj.id, input: { credito_iniziale: Number(credito), start_date: startDate } } });
+                                    setSnackbarOpen(true);
+                                }}
+                                snackbarOpen={snackbarOpen}
+                                setSnackbarOpen={setSnackbarOpen}
+                            />
                         )}
                     </Card>
                     {/* Form per aggiungere spese - mostrato solo se una carta specifica è selezionata */}
                     {selectedCard !== 'all' && (
-                        <Card>
-                            <CardHeader title={<Typography variant="h6">
-                                Aggiungi Spesa a {cards?.cards.find(c => c.id === selectedCard)?.name}
-                            </Typography>} />
-                            <Divider />
-                            <CardContent>
-                                <Stack direction={{ xs: 'column', sm: 'row' }} spacing={2}>
-                                    <TextField
-                                        label="Descrizione"
-                                        value={description}
-                                        onChange={e => setDescription(e.target.value)}
-                                        required
-                                        size="small"
-                                        sx={{ minWidth: 200 }}
-                                    />
-                                    <TextField
-                                        label="Importo (€)"
-                                        type="number"
-                                        value={amount}
-                                        onChange={e => setAmount(e.target.value)}
-                                        required
-                                        size="small"
-                                        inputProps={{ min: 0, step: 0.01 }}
-                                        sx={{ minWidth: 120 }}
-                                    />
-                                    <TextField
-                                        label="Categoria"
-                                        value={category}
-                                        onChange={e => setCategory(e.target.value)}
-                                        required
-                                        size="small"
-                                        sx={{ minWidth: 150 }}
-                                    />
-                                    <TextField
-                                        label="Data"
-                                        type="date"
-                                        value={date}
-                                        onChange={e => setDate(e.target.value)}
-                                        required
-                                        size="small"
-                                        InputLabelProps={{ shrink: true }}
-                                        sx={{ minWidth: 150 }}
-                                    />
-                                    <Button onClick={handleAddExpense} variant="contained" size="small">
-                                        Aggiungi
-                                    </Button>
-                                </Stack>
-                            </CardContent>
-                        </Card>
+                        <AddTransactionForm
+                            title="Aggiungi Spesa"
+                            cardName={cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
+                            description={description}
+                            amount={amount}
+                            category={category}
+                            date={date}
+                            onDescriptionChange={setDescription}
+                            onAmountChange={setAmount}
+                            onCategoryChange={setCategory}
+                            onDateChange={setDate}
+                            onSubmit={handleAddExpense}
+                        />
                     )}
 
                     {<TableContainer component={Paper}>
@@ -367,7 +269,7 @@ const Expenses: React.FC = () => {
                                         <TableRow>
                                             <TableCell colSpan={selectedCard === 'all' ? 7 : 6} align="center" sx={{ py: 4 }}>
                                                 <Typography color="text.secondary" align='center'>
-                                                    Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find(c => c.id === selectedCard)?.name}
+                                                    Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
                                                 </Typography>
                                             </TableCell>
                                         </TableRow>
