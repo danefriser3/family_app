@@ -23,7 +23,6 @@ jobs:
         name: Fetch Dependencies
       - run: npm run dev
         name: Start Application
-        background: true
       - run: npx cypress run --headless --browser chrome
         name: Run Cypress Tests
 
