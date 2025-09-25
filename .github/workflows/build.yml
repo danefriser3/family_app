@@ -1,0 +1,43 @@
+name: Build
+on:
+ push:
+   branches:
+     - main
+     - develop
+     - feat/*
+     - fix/*
+ pull_request:
+   types: [opened, synchronize, reopened]
+jobs:
+  sonarqube:
+    name: SonarQube
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.17.1'
+      - uses: browser-actions/setup-chromium@v1
+      - run: yarn install
+        name: Fetch Dependencies
+      - run: yarn dev &
+        name: Start Application
+      - run: yarn cy:run --headless --browser chrome
+        name: Run Cypress Tests
+
+      - name: Generate lcov from coverage
+        if: always()
+        run: npx nyc report --reporter=lcov --report-dir=coverage
+
+      - name: SonarQube Scan
+        uses: SonarSource/sonarqube-scan-action@v6
+        env:
+          SONAR_TOKEN: ${{ secrets.SONARCLOUD_TOKEN }}
+          SONAR_HOST_URL: https://sonarcloud.io
+        with:
+          args: >-
+            -Dsonar.projectKey=${{ secrets.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ secrets.SONAR_ORGANIZATION }}
+            -Dsonar.sources=src
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info

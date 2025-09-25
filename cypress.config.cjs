@@ -9,7 +9,8 @@ module.exports = defineConfig({
     video: true,
     screenshotOnRunFailure: true,
     setupNodeEvents(on, config) {
-      // implement node event listeners here if needed
+      // code coverage task
+      require('@cypress/code-coverage/task')(on, config);
       return config;
     },
   },
