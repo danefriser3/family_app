@@ -2,6 +2,60 @@ name: CI
 
 on:
 	push:
+		branches: [ "main", "feat/**", "fix/**", "hotfix/**" ]
+	pull_request:
+		branches: [ "main" ]
+
+concurrency:
+	group: ${{ github.workflow }}-${{ github.ref }}
+	cancel-in-progress: true
+
+jobs:
+	e2e:
+		name: E2E (Cypress)
+		runs-on: ubuntu-latest
+		steps:
+			- name: Checkout
+				uses: actions/checkout@v4
+
+			- name: Setup Node.js
+				uses: actions/setup-node@v4
+				with:
+					node-version: 20
+					cache: npm
+
+			- name: Install dependencies
+				run: npm ci
+
+			- name: Lint
+				run: npm run lint
+
+			- name: Run Cypress E2E
+				uses: cypress-io/github-action@v6
+				with:
+					start: npm run dev
+					wait-on: 'http://localhost:5173'
+					config-file: cypress.config.cjs
+					browser: electron
+
+			- name: Upload Cypress videos
+				if: always()
+				uses: actions/upload-artifact@v4
+				with:
+					name: cypress-videos
+					path: cypress/videos/**/*.mp4
+					if-no-files-found: ignore
+
+			- name: Upload Cypress screenshots
+				if: failure()
+				uses: actions/upload-artifact@v4
+				with:
+					name: cypress-screenshots
+					path: cypress/screenshots/**/*
+					if-no-files-found: ignore
+name: CI
+on:
+	push:
 		branches:
 			- main
 			- feat/**
@@ -27,15 +81,17 @@ jobs:
 			- name: Setup Node.js
 				uses: actions/setup-node@v4
 				with:
+name: CI
+"on":
 					node-version: 20
 					cache: npm
-
-			- name: Install dependencies
-				run: npm ci
-
+			- "main"
+			- "feat/**"
+			- "fix/**"
+			- "hotfix/**"
 			- name: Lint
-				run: npm run lint
-
+		branches:
+			- "main"
 			- name: Run Cypress E2E
 				uses: cypress-io/github-action@v6
 				with:
