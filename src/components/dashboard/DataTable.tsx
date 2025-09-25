@@ -46,7 +46,7 @@ export const DataTable: React.FC<DataTableProps> = ({ title, data, columns }) =>
               {data.map((row, index) => {
                 const idVal = (row as { id?: string | number }).id;
                 const fallbackKey = columns.map((col) => String(row[col.id])).join('|');
-                const rowKey = idVal != null ? String(idVal) : fallbackKey || String(index);
+                const rowKey = idVal == null ? (fallbackKey || String(index)) : String(idVal);
                 return (
                   <TableRow
                     key={rowKey}

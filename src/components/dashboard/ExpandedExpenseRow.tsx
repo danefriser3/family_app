@@ -85,7 +85,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
   }, [expanded, expense.id]);
 
   useEffect(() => {
-    if (productsData && productsData.expenseProducts) {
+    if (productsData?.expenseProducts) {
       setProducts(productsData.expenseProducts);
     }
   }, [productsData]);
