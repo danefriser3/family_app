@@ -19,16 +19,45 @@ jobs:
         with:
           node-version: '22.17.1'
       - uses: browser-actions/setup-chromium@v1
-      - run: yarn install
+      - run: yarn install --frozen-lockfile
         name: Fetch Dependencies
       - run: yarn dev &
         name: Start Application
+      - run: yarn test:unit:coverage
+        name: Run Unit Tests (Vitest)
       - run: yarn cy:run --headless --browser chrome
         name: Run Cypress Tests
 
-      - name: Generate lcov from coverage
+      - name: Merge coverage (unit + e2e) and generate lcov
         if: always()
-        run: npx nyc report --reporter=lcov --report-dir=coverage
+        run: |
+          # Move unit lcov to a temp file
+          mkdir -p coverage
+          cp coverage-unit/lcov.info coverage/lcov.unit.info || true
+          # Generate E2E lcov from .nyc_output coverage
+          npx nyc report --reporter=lcov --report-dir=coverage-e2e || true
+          cp coverage-e2e/lcov.info coverage/lcov.e2e.info || true
+          # Merge both into a single lcov.info
+          npx nyc merge coverage coverage/merged.json || true
+          npx nyc report --reporter=lcov --report-dir=coverage --temp-dir=coverage || true
+          # Fallback: if merged lcov missing, prefer unit then e2e
+          if [ ! -s coverage/lcov.info ] && [ -s coverage/lcov.unit.info ]; then cp coverage/lcov.unit.info coverage/lcov.info; fi
+          if [ ! -s coverage/lcov.info ] && [ -s coverage/lcov.e2e.info ]; then cp coverage/lcov.e2e.info coverage/lcov.info; fi
+
+      - name: Coverage summary (text)
+        if: always()
+        run: npx nyc report --reporter=text-summary --temp-dir=coverage || true
+
+      - name: Upload coverage HTML
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-html
+          path: |
+            coverage/**
+            coverage-unit/**
+            coverage-e2e/**
+          if-no-files-found: ignore
 
       - name: SonarQube Scan
         uses: SonarSource/sonarqube-scan-action@v6
