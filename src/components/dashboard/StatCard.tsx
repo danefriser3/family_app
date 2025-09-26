@@ -6,10 +6,8 @@ import {
   Box,
   Avatar,
 } from '@mui/material';
-import {
-  TrendingUp,
-  TrendingDown
-} from '@mui/icons-material';
+import TrendingUp from '@mui/icons-material/TrendingUp';
+import TrendingDown from '@mui/icons-material/TrendingDown';
 import { StatCardData } from '../../types';
 
 export const StatCard: React.FC<StatCardData> = ({
