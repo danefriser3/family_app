@@ -48,15 +48,22 @@ jobs:
         if: always()
         run: npx nyc report --reporter=text-summary --temp-dir=coverage || true
 
-      - name: Upload coverage HTML
+      - name: Remove HTML coverage directories (avoid invalid artifact paths)
+        if: always()
+        run: |
+          rm -rf coverage/lcov-report || true
+          rm -rf coverage-unit/lcov-report || true
+          rm -rf coverage-e2e/lcov-report || true
+
+      - name: Upload coverage reports (LCOV only)
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-html
+          name: coverage-reports
           path: |
-            coverage/**
-            coverage-unit/**
-            coverage-e2e/**
+            coverage/lcov.info
+            coverage-unit/lcov.info
+            coverage-e2e/lcov.info
           if-no-files-found: ignore
 
       - name: SonarQube Scan

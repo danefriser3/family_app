@@ -23,16 +23,16 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
+                <span class="strong">77.27% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>33/44</span>
+                <span class='fraction'>34/44</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">18.18% </span>
+                <span class="strong">20% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>2/11</span>
+                <span class='fraction'>2/10</span>
             </div>
         
             
@@ -44,9 +44,9 @@
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">75% </span>
+                <span class="strong">77.27% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>33/44</span>
+                <span class='fraction'>34/44</span>
             </div>
         
             
@@ -128,33 +128,33 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-no">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -178,34 +178,34 @@ import Incomes from './pages/Incomes';
 function App() {
   const [activeTab, setActiveTab] = useState&lt;TabType&gt;('dashboard');
 &nbsp;
-  const handleTabChange = (tab: string) =&gt; {
-<span class="fstat-no" title="function not covered" >    setActiveTab(tab as TabType);</span>
+  const handleTabChange = <span class="fstat-no" title="function not covered" >(tab: string) =&gt; {</span>
+<span class="cstat-no" title="statement not covered" >    setActiveTab(tab as TabType);</span>
 <span class="cstat-no" title="statement not covered" >  };</span>
 &nbsp;
   const renderContent = () =&gt; {
     switch (activeTab) {
       case 'dashboard':
-        return <span class="branch-0 cbranch-no" title="branch not covered" >&lt;D</span>ashboard /&gt;;
-      case 'expenses':
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;Expenses /&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'incomes':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;Incomes /&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'users':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Gestione Utenti - In sviluppo&lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'inventory':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Inventario - In sviluppo&lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'reports':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Report - In sviluppo&lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'profile':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Profilo - In sviluppo&lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      case 'settings':</span>
-<span class="branch-0 cbranch-no" title="branch not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Impostazioni - In sviluppo&lt;/div&gt;;</span>
-<span class="cstat-no" title="statement not covered" >      default:</span>
-        return <span class="branch-0 cbranch-no" title="branch not covered" >&lt;Dashboard /&gt;;</span>
-<span class="cstat-no" title="statement not covered" >    }</span>
-<span class="cstat-no" title="statement not covered" >  };</span>
+        return &lt;Dashboard /&gt;;
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'expenses':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;Expenses /&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'incomes':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;Incomes /&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'users':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Gestione Utenti - In sviluppo&lt;/div&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'inventory':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Inventario - In sviluppo&lt;/div&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'reports':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Report - In sviluppo&lt;/div&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'profile':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Profilo - In sviluppo&lt;/div&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      case 'settings':</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;div className="p-8 text-center text-gray-500"&gt;Impostazioni - In sviluppo&lt;/div&gt;;</span>
+<span class="branch-0 cbranch-no" title="branch not covered" >      default:</span>
+<span class="cstat-no" title="statement not covered" >        return &lt;Dashboard /&gt;;</span>
+    }
+  };
 &nbsp;
-<span class="cstat-no" title="statement not covered" >  return (</span>
+  return (
     &lt;ThemeProvider theme={theme}&gt;
       &lt;CssBaseline /&gt;
       &lt;Layout activeTab={activeTab} onTabChange={handleTabChange}&gt;
@@ -223,7 +223,7 @@ export default App;
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-09-26T16:15:30.635Z
+                at 2025-09-26T16:40:26.935Z
             </div>
         <script src="../prettify.js"></script>
         <script>
