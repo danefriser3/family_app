@@ -14,6 +14,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
@@ -21,32 +23,26 @@ jobs:
       - uses: browser-actions/setup-chromium@v1
       - run: yarn install --frozen-lockfile
         name: Fetch Dependencies
-      - run: yarn dev &
-        name: Start Application
       - run: yarn test:unit:coverage
         name: Run Unit Tests (Vitest)
-      - run: yarn cy:run --headless --browser chrome
-        name: Run Cypress Tests
+      - run: yarn coverage:e2e
+        name: Run Cypress Tests with Coverage
 
-      - name: Merge coverage (unit + e2e) and generate lcov
+      - name: Merge coverage (unit + e2e) into coverage/lcov.info
         if: always()
         run: |
-          # Move unit lcov to a temp file
-          mkdir -p coverage
-          cp coverage-unit/lcov.info coverage/lcov.unit.info || true
-          # Generate E2E lcov from .nyc_output coverage
-          npx nyc report --reporter=lcov --report-dir=coverage-e2e || true
-          cp coverage-e2e/lcov.info coverage/lcov.e2e.info || true
-          # Merge both into a single lcov.info
-          npx nyc merge coverage coverage/merged.json || true
-          npx nyc report --reporter=lcov --report-dir=coverage --temp-dir=coverage || true
-          # Fallback: if merged lcov missing, prefer unit then e2e
-          if [ ! -s coverage/lcov.info ] && [ -s coverage/lcov.unit.info ]; then cp coverage/lcov.unit.info coverage/lcov.info; fi
-          if [ ! -s coverage/lcov.info ] && [ -s coverage/lcov.e2e.info ]; then cp coverage/lcov.e2e.info coverage/lcov.info; fi
+          # Ensure unit and e2e LCOV exist
+          test -f coverage-unit/lcov.info || echo "warning: missing unit lcov"
+          test -f coverage-e2e/lcov.info || echo "warning: missing e2e lcov"
+          # Merge via project script to avoid empty LCOVs
+          yarn coverage:merge
 
       - name: Coverage summary (text)
         if: always()
-        run: npx nyc report --reporter=text-summary --temp-dir=coverage || true
+        run: |
+          echo "Unit LCOV: $(test -f coverage-unit/lcov.info && wc -l < coverage-unit/lcov.info || echo 0) lines"
+          echo "E2E  LCOV: $(test -f coverage-e2e/lcov.info && wc -l < coverage-e2e/lcov.info || echo 0) lines"
+          echo "Merged LCOV: $(test -f coverage/lcov.info && wc -l < coverage/lcov.info || echo 0) lines"
 
       - name: Remove HTML coverage directories (avoid invalid artifact paths)
         if: always()
