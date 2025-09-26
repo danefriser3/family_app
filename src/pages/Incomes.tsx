@@ -21,7 +21,7 @@ import {
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
-import { Delete } from '@mui/icons-material';
+import Delete from '@mui/icons-material/Delete';
 import { Expense as Income, formatDateYYYYMMDDLocal } from '../types';
 import { Card as CardType } from '../types/graphql';
 import { GetCardsData } from './Expenses';

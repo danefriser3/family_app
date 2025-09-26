@@ -9,11 +9,9 @@ import {
   Menu,
   MenuItem,
 } from '@mui/material';
-import {
-  Notifications as NotificationsIcon,
-  Search as SearchIcon,
-  AccountCircle as AccountCircleIcon,
-} from '@mui/icons-material';
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import SearchIcon from '@mui/icons-material/Search';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
 const drawerWidth = 240;
 

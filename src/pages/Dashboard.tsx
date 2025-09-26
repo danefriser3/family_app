@@ -7,11 +7,9 @@ import {
   LinearProgress,
   Chip
 } from '@mui/material';
-import {
-    AttachMoney as AttachMoneyIcon,
-    ShoppingCart as ShoppingCartIcon,
-    Money,
-} from '@mui/icons-material';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
+import Money from '@mui/icons-material/Money';
 import { StatCard } from '../components/dashboard/StatCard';
 import { DataTable } from '../components/dashboard/DataTable';
 import { StatCardData, TableColumn, Expense, User } from '../types';

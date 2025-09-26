@@ -11,16 +11,14 @@ import {
   Box,
   Typography,
 } from '@mui/material';
-import {
-  Dashboard as DashboardIcon,
-  People as PeopleIcon,
-  BarChart as BarChartIcon,
-  Settings as SettingsIcon,
-  Assessment as AssessmentIcon,
-  Inventory as InventoryIcon,
-  AccountCircle as AccountCircleIcon,
-  AttachMoney as AttachMoneyIcon,
-} from '@mui/icons-material';
+import DashboardIcon from '@mui/icons-material/Dashboard';
+import PeopleIcon from '@mui/icons-material/People';
+import BarChartIcon from '@mui/icons-material/BarChart';
+import SettingsIcon from '@mui/icons-material/Settings';
+import AssessmentIcon from '@mui/icons-material/Assessment';
+import InventoryIcon from '@mui/icons-material/Inventory';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { SidebarProps, MenuItem } from '../../types';
 
 const drawerWidth = 240;
