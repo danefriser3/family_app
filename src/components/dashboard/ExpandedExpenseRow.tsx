@@ -23,11 +23,9 @@ import {
   Checkbox,
   IconButton
 } from '@mui/material';
-import {
-  Add,
-  Delete,
-  Remove
-} from '@mui/icons-material';
+import Add from '@mui/icons-material/Add';
+import Delete from '@mui/icons-material/Delete';
+import Remove from '@mui/icons-material/Remove';
 import { Expense } from '../../types';
 
 // Tipi per prodotti associati alle spese

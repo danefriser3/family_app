@@ -8,7 +8,7 @@ import {
   IconButton,
   SelectChangeEvent
 } from '@mui/material';
-import { Sync } from '@mui/icons-material';
+import Sync from '@mui/icons-material/Sync';
 import { Card as CardType } from '../../types/graphql';
 
 export interface CardSelectorProps {

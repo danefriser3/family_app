@@ -12,7 +12,7 @@ import {
   Typography,
   IconButton,
 } from '@mui/material';
-import { MoreVert as MoreVertIcon } from '@mui/icons-material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { DataTableProps } from '../../types';
 
 export const DataTable: React.FC<DataTableProps> = ({ title, data, columns }) => {
