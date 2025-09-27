@@ -16,21 +16,21 @@ import {
   CardContent,
   Divider,
   Checkbox,
-  ButtonGroup
+  ButtonGroup,
+  Box
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
 import Delete from '@mui/icons-material/Delete';
 import { Expense as Income, formatDateYYYYMMDDLocal } from '../types';
-import { Card as CardType } from '../types/graphql';
 import { GetCardsData } from './Expenses';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
 
 export interface GetIncomesData {
-    incomes: Income[];
+  incomes: Income[];
 }
 
 const Incomes = () => {
@@ -97,7 +97,7 @@ const Incomes = () => {
     if (!description || !amount || !category || !date) return;
     await addIncome({
       variables: {
-        input: {
+        incomeInput: {
           description,
           amount: Number(amount),
           category,
@@ -228,7 +228,23 @@ const Incomes = () => {
                         <TableCell align="center">{income.category}</TableCell>
                         <TableCell align="right">€{income.amount.toFixed(2)}</TableCell>
                         <TableCell align="center">{new Date(Number(income.date)).toLocaleDateString()}</TableCell>
-                        {selectedCard === 'all' && <TableCell align="center">{cards?.cards.find((c: CardType) => c.id === income.card_id)?.name}</TableCell>}
+                        {selectedCard === 'all' && (
+                          <TableCell align="center">
+                            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 1 }}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box
+                                  sx={{
+                                    width: 8,
+                                    height: 8,
+                                    borderRadius: '50%',
+                                    backgroundColor: cards?.cards.find(c => c.id === income.card_id)?.color
+                                  }}
+                                />
+                                <Typography variant="body2">{cards?.cards.find(c => c.id === income.card_id)?.name}</Typography>
+                              </Box>
+                            </Box>
+                          </TableCell>
+                        )}
                         <TableCell align="right">
                           <IconButton onClick={() => handleDeleteIncome(income.id)}>
                             <Delete />

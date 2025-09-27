@@ -123,7 +123,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
         slots={{ transition: Slide }}
-        slotProps={{ transition: { direction: 'left' }}}
+        slotProps={{ transition: { direction: 'left' } }}
       >
         <Alert severity="warning" onClose={() => setSnackbarOpen(false)} sx={{ width: '100%' }}>
           Il totale dei prodotti supera il prezzo della spesa!
@@ -175,100 +175,102 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
               <Typography variant="body2">Caricamento prodotti...</Typography>
             ) : (
               <Stack direction="column" spacing={2}>
-                {products.length > 0 && (
-                  <Card>
-                    <CardHeader title="Prodotti associati" action={
-                      <IconButton onClick={handleShowAddProduct}>
-                        {showAddProduct ? <Remove /> : <Add />}
-                      </IconButton>
-                    } />
-                    <Divider />
-                    {showAddProduct && (
-                      <>
-                        <CardContent>
-                          <Box
-                            component="form"
-                            sx={{
-                              display: 'flex',
-                              gap: 2,
-                              alignItems: 'center',
-                              width: '100%',
-                            }}
-                            onSubmit={handleAddProduct}
+                <Card>
+                  <CardHeader title="Prodotti associati" action={
+                    <IconButton onClick={handleShowAddProduct}>
+                      {showAddProduct ? <Remove /> : <Add />}
+                    </IconButton>
+                  } />
+                  <Divider />
+                  {showAddProduct && (
+                    <>
+                      <CardContent>
+                        <Box
+                          component="form"
+                          sx={{
+                            display: 'flex',
+                            gap: 2,
+                            alignItems: 'center',
+                            width: '100%',
+                          }}
+                          onSubmit={handleAddProduct}
+                        >
+                          <TextField
+                            label="Nome prodotto"
+                            size="small"
+                            required
+                            name="name"
+                            value={newProduct.name}
+                            onChange={e => setNewProduct(p => ({ ...p, name: e.target.value }))}
+                            fullWidth
+                            sx={{ flexGrow: 1 }}
+                          />
+                          <TextField
+                            label="Quantità"
+                            size="small"
+                            type="number"
+                            required
+                            name="quantity"
+                            value={newProduct.quantity}
+                            onChange={e => setNewProduct(p => ({ ...p, quantity: Number(e.target.value) }))}
+                            fullWidth
+                            sx={{ flexGrow: 1 }}
+                          />
+                          <TextField
+                            label="Prezzo (€)"
+                            size="small"
+                            type="number"
+                            required
+                            name="price"
+                            value={newProduct.price}
+                            onChange={e => setNewProduct(p => ({ ...p, price: Number(e.target.value) }))}
+                            fullWidth
+                            sx={{ flexGrow: 1 }}
+                          />
+                          <Button
+                            type="submit"
+                            variant="contained"
+                            size="small"
+                            sx={{ flexShrink: 0, minWidth: 160 }}
                           >
-                            <TextField
-                              label="Nome prodotto"
-                              size="small"
-                              required
-                              name="name"
-                              value={newProduct.name}
-                              onChange={e => setNewProduct(p => ({ ...p, name: e.target.value }))}
-                              fullWidth
-                              sx={{ flexGrow: 1 }}
-                            />
-                            <TextField
-                              label="Quantità"
-                              size="small"
-                              type="number"
-                              required
-                              name="quantity"
-                              value={newProduct.quantity}
-                              onChange={e => setNewProduct(p => ({ ...p, quantity: Number(e.target.value) }))}
-                              fullWidth
-                              sx={{ flexGrow: 1 }}
-                            />
-                            <TextField
-                              label="Prezzo (€)"
-                              size="small"
-                              type="number"
-                              required
-                              name="price"
-                              value={newProduct.price}
-                              onChange={e => setNewProduct(p => ({ ...p, price: Number(e.target.value) }))}
-                              fullWidth
-                              sx={{ flexGrow: 1 }}
-                            />
-                            <Button
-                              type="submit"
-                              variant="contained"
-                              size="small"
-                              sx={{ flexShrink: 0, minWidth: 160 }}
-                            >
-                              Aggiungi prodotto
-                            </Button>
-                          </Box>
-                        </CardContent>
-                        <Divider />
-                      </>
-                    )}
-                    <CardContent>
-                      <Stack direction="column" spacing={2}>
+                            Aggiungi prodotto
+                          </Button>
+                        </Box>
+                      </CardContent>
+                      <Divider />
+                    </>
+                  )}
+                  <CardContent>
+                    <Stack direction="column" spacing={2}>
 
-                        <Table size="small">
-                          <TableHead>
+                      <Table size="small">
+                        <TableHead>
+                          <TableRow>
+                            <TableCell>Nome</TableCell>
+                            <TableCell>Quantità</TableCell>
+                            <TableCell>Prezzo</TableCell>
+                          </TableRow>
+                        </TableHead>
+                        <TableBody>
+                          {products.length === 0 && (
                             <TableRow>
-                              <TableCell>Nome</TableCell>
-                              <TableCell>Quantità</TableCell>
-                              <TableCell>Prezzo</TableCell>
+                              <TableCell colSpan={3}>
+                                <Typography variant="body2" padding={2} color="text.secondary" textAlign={'center'}>Nessun prodotto associato</Typography>
+                              </TableCell>
                             </TableRow>
-                          </TableHead>
-                          <TableBody>
-                            {products.map((prod: ExpenseProduct) => (
-                              <TableRow key={prod.id}>
-                                <TableCell>{prod.name}</TableCell>
-                                <TableCell>{prod.quantity}</TableCell>
-                                <TableCell>€{prod.price}</TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </Stack>
-                    </CardContent>
-                  </Card>
-                )}
-                {products.length === 0 && (
-                  <Typography variant="body2" color="text.secondary">Nessun prodotto associato</Typography>
-                )}
+                          )}
+                          {products.map((prod: ExpenseProduct) => (
+                            <TableRow key={prod.id}>
+                              <TableCell>{prod.name}</TableCell>
+                              <TableCell>{prod.quantity}</TableCell>
+                              <TableCell>€{prod.price}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </Stack>
+                  </CardContent>
+                </Card>
                 {/* Form per aggiungere prodotto */}
               </Stack>
             )}
