@@ -143,7 +143,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
         </TableCell>
         <TableCell>{expense.description}</TableCell>
         <TableCell align="center">{expense.category}</TableCell>
-        <TableCell align="right">€{expense.amount.toFixed(2)}</TableCell>
+        <TableCell align="right">€ {expense.amount.toFixed(2)}</TableCell>
         <TableCell align="center">{new Date(Number(expense.date)).toLocaleDateString()}</TableCell>
         {selectedCard === 'all' && (
           <TableCell align="center">
@@ -263,9 +263,13 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             <TableRow key={prod.id}>
                               <TableCell>{prod.name}</TableCell>
                               <TableCell>{prod.quantity}</TableCell>
-                              <TableCell>€{prod.price}</TableCell>
+                              <TableCell>€ {prod.price}</TableCell>
                             </TableRow>
                           ))}
+                          <TableRow>
+                            <TableCell colSpan={2} align="right"><strong>Totale Prodotti:</strong></TableCell>
+                            <TableCell><strong>€ {products.reduce((sum, prod) => sum + prod.price, 0).toFixed(2)}</strong></TableCell>
+                          </TableRow>
                         </TableBody>
                       </Table>
                     </Stack>
