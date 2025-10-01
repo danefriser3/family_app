@@ -1,12 +1,13 @@
 import React from 'react';
 import {
-  Typography,
-  Box,
-  Card,
-  CardContent,
-  LinearProgress,
-  Chip
+    Typography,
+    Box,
+    Card,
+    CardContent,
+    LinearProgress,
+    Chip
 } from '@mui/material';
+import { LineChart } from '@mui/x-charts/LineChart'
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Money from '@mui/icons-material/Money';
@@ -25,8 +26,43 @@ const useTotals = () => {
     const totalIncomes = incomesData?.incomes?.reduce((sum, i) => sum + (i.amount || 0), 0) || 0;
     const totalCreditoIniziale = cardsData?.cards?.reduce((sum, c) => sum + (c.credito_iniziale || 0), 0) || 0;
     const totalCreditoAttuale = totalCreditoIniziale + totalIncomes - totalExpenses;
-    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale };
+        return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale, expensesData, incomesData };
 };
+
+function parseDateSafe(value?: string) {
+    if (!value) return undefined
+    // support timestamp string or ISO/date string
+    const n = Number(value)
+    const d = isNaN(n) ? new Date(value) : new Date(n)
+    return isNaN(d.getTime()) ? undefined : d
+}
+
+function buildLastMonthsLabels(count = 6) {
+    const arr: { key: string; label: string }[] = []
+    const now = new Date()
+    for (let i = count - 1; i >= 0; i--) {
+        const d = new Date(now)
+        d.setDate(1)
+        d.setHours(0, 0, 0, 0)
+        d.setMonth(d.getMonth() - i)
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        const label = d.toLocaleString('it-IT', { month: 'short' }) + ' ' + String(d.getFullYear()).slice(2)
+        arr.push({ key, label })
+    }
+    return arr
+}
+
+function aggregateByMonth(items?: Expense[]) {
+    const map: Record<string, number> = {}
+    if (!items) return map
+    for (const it of items) {
+        const d = parseDateSafe(it.date)
+        if (!d) continue
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+        map[key] = (map[key] ?? 0) + (it.amount || 0)
+    }
+    return map
+}
 
 const recentUsers: User[] = [
     {
@@ -86,7 +122,15 @@ const tableColumns: TableColumn[] = [
 
 
 export const Dashboard: React.FC = () => {
-    const { totalExpenses, totalIncomes, totalCreditoAttuale } = useTotals();
+    const { totalExpenses, totalIncomes, totalCreditoAttuale, expensesData, incomesData } = useTotals();
+
+    // Build data for small trend chart (last 6 months)
+    const months = buildLastMonthsLabels(6)
+    const expByMonth = aggregateByMonth(expensesData?.expenses)
+    const incByMonth = aggregateByMonth(incomesData?.incomes)
+    const xData = months.map(m => m.label)
+    const expSeries = months.map(m => +(expByMonth[m.key] ?? 0).toFixed(2))
+    const incSeries = months.map(m => +(incByMonth[m.key] ?? 0).toFixed(2))
 
     const statsData: StatCardData[] = [
         {
@@ -151,6 +195,25 @@ export const Dashboard: React.FC = () => {
                     gap: 3
                 }}
             >
+                {/* Trend Entrate/Spese */}
+                <Box>
+                    <Card className="h-full">
+                        <CardContent>
+                            <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+                                Andamento Entrate/Spese (ultimi 6 mesi)
+                            </Typography>
+                                                        <LineChart
+                                                            height={300}
+                                                            xAxis={[{ data: xData, scaleType: 'point' }]}
+                                                            series={[
+                                                                { data: incSeries, label: 'Entrate', color: '#2e7d32' },
+                                                                { data: expSeries, label: 'Spese', color: '#c62828' },
+                                                            ]}
+                                                            margin={{ left: 40, right: 20, top: 10, bottom: 20 }}
+                                                        />
+                        </CardContent>
+                    </Card>
+                </Box>
                 {/* Recent Activity */}
                 <Box>
                     <DataTable
