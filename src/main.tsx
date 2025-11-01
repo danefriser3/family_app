@@ -6,7 +6,8 @@ import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
 import { ApolloProvider } from '@apollo/client/react'
 
 // Prefer Vite env var if provided; fallback to current origin
-const serverBaseUrl = (import.meta.env.VITE_SERVER_URL as string | undefined) ?? window.location.origin
+/* c8 ignore next */
+const serverBaseUrl = (import.meta.env.VITE_SERVER_URL as string | undefined) ?? globalThis.location.origin
 
 const client = new ApolloClient({
   link: new HttpLink({ uri: `${serverBaseUrl}graphql` }), // Cambia se il tuo server è su una porta diversa
