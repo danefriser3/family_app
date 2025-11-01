@@ -1,5 +1,5 @@
 import ExpandedExpenseRow from '../components/dashboard/ExpandedExpenseRow';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Expense, formatDateYYYYMMDDLocal } from '../types';
 import {
     Button,
@@ -20,17 +20,93 @@ import {
     ButtonGroup
 } from '@mui/material';
 import { useMutation, useQuery } from '@apollo/client/react';
-import { GET_CARDS, GET_EXPENSES } from '../graphql/queries';
+import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
 import { Card as CardType } from '../types/graphql';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
+import { GetIncomesData } from './Incomes';
 export interface GetCardsData {
     cards: CardType[];
 }
 export interface GetExpensesData {
     expenses: Expense[];
+}
+
+// Helper: compute a comparable key for the calendar day (YYYY-MM-DD)
+const getDayKey = (d?: string | number): string => {
+    const n = Number(d);
+    const date = isNaN(n) ? new Date(String(d ?? 0)) : new Date(n);
+    const y = date.getFullYear();
+    const m = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+};
+
+// Build expense rows with a divider when the day changes
+function buildExpenseRows(params: {
+    expenses: Expense[];
+    selectedCard: string;
+    expandedRow: string | null;
+    selectedIds: string[];
+    onSelect: (id: string) => void;
+    onDelete: (id?: string) => void;
+    onExpand: (id: string) => void;
+    cards?: CardType[];
+    sumUpToById: Record<string, number>;
+}) {
+    const {
+        expenses,
+        selectedCard,
+        expandedRow,
+        selectedIds,
+        onSelect,
+        onDelete,
+        onExpand,
+        cards,
+        sumUpToById
+    } = params;
+    const nodes: React.ReactNode[] = [];
+    let lastDayKey: string | null = null;
+    for (const expense of expenses) {
+        const currentKey = getDayKey(expense.date);
+        const showDivider = lastDayKey !== null && currentKey !== lastDayKey;
+        lastDayKey = currentKey;
+        if (showDivider) {
+            nodes.push(
+                <TableRow key={`divider-${expense.id ?? currentKey}-${currentKey}`}>
+                    <TableCell colSpan={selectedCard === 'all' ? 7 : 6} sx={{ py: 0.5, background: '#fafafa' }}>
+                        <Divider textAlign="left">
+                            <Typography variant="caption">{new Date(Number(expense.date)).toLocaleDateString()}</Typography>
+                        </Divider>
+                    </TableCell>
+                </TableRow>
+            );
+        }
+        const creditDeltaAfter = (() => {
+            const cardId = expense.card_id ?? selectedCard;
+            const card = cards?.find((c: CardType) => c.id === cardId);
+            const sumUpTo = expense.id ? sumUpToById[expense.id] ?? 0 : 0;
+            return typeof card?.credito_iniziale === 'number' ? Number(card.credito_iniziale) - sumUpTo : undefined;
+        })();
+        nodes.push(
+            <React.Fragment key={expense.id}>
+                <ExpandedExpenseRow
+                    expense={expense}
+                    selectedCard={selectedCard}
+                    expanded={expandedRow === expense.id}
+                    selected={selectedIds.includes(expense.id ?? '')}
+                    onSelect={() => onSelect(expense.id ?? '')}
+                    onDelete={() => onDelete(expense.id)}
+                    onExpand={() => onExpand(expense.id ?? '')}
+                    cards={cards}
+                    creditDeltaAfter={creditDeltaAfter}
+                />
+            </React.Fragment>
+        );
+    }
+    return nodes;
 }
 
 const Expenses: React.FC = () => {
@@ -46,6 +122,10 @@ const Expenses: React.FC = () => {
     const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
     const { data: expenses, loading, error, refetch } = useQuery<GetExpensesData>(GET_EXPENSES, {
         variables: { cardId: selectedCard === 'all' ? null : selectedCard },
+        fetchPolicy: 'network-only'
+    });
+    const { data: incomes } = useQuery<GetIncomesData>(GET_INCOMES, {
+        variables: { cardId: selectedCard === 'all' ? undefined : selectedCard },
         fetchPolicy: 'network-only'
     });
     const [deleteExpense] = useMutation(DELETE_EXPENSE);
@@ -76,9 +156,79 @@ const Expenses: React.FC = () => {
         return allExpenses || [];
     };
 
+    // Rank function: extract trailing numeric part of id; fallback to lexicographic
+    const idRank = (id?: string): number | string => {
+        if (!id) return 0;
+        const rx = /(\d+)(?!.*\d)/;
+        const m = rx.exec(id); // last number in the string
+        const lastDigits = m?.[1];
+        if (lastDigits) return Number(lastDigits);
+        return id;
+    };
+
+    // Precompute cumulative totals per expense id based on id order (lower id considered "precedente")
+    // For a given row, sum = expenses with lower id + current.
+    const sumUpToById: Record<string, number> = React.useMemo(() => {
+        const map: Record<string, number> = {};
+        const byCard: Record<string, Expense[]> = {};
+        for (const e of getDisplayedExpenses()) {
+            const key = String(e.card_id ?? '');
+            if (!byCard[key]) byCard[key] = [];
+            byCard[key].push(e);
+        }
+        for (const key of Object.keys(byCard)) {
+            const arr = byCard[key].slice().sort((a, b) => {
+                const ra = idRank(a.id);
+                const rb = idRank(b.id);
+                // sort ASC by rank; lowest id first
+                if (typeof ra === 'number' && typeof rb === 'number') return ra - rb;
+                return String(ra).localeCompare(String(rb));
+            });
+            let acc = 0;
+            for (const e of arr) {
+                acc += Number(e.amount || 0); // include current in sum
+                const id = e.id;
+                if (id) map[id] = acc;
+            }
+        }
+        return map;
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [allExpenses]);
+
+    const renderedExpenseRows = useMemo(() => {
+        if (loading || error) return [] as React.ReactNode[];
+        return buildExpenseRows({
+            expenses: getDisplayedExpenses(),
+            selectedCard,
+            expandedRow,
+            selectedIds,
+            onSelect: (id: string) => handleSelect(id),
+            onDelete: (id?: string) => handleDeleteExpense(id),
+            onExpand: (id: string) => handleExpandRow(id),
+            cards: cards?.cards,
+            sumUpToById
+        });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [loading, error, allExpenses, selectedCard, expandedRow, selectedIds, cards, sumUpToById]);
     // Funzione per calcolare il totale delle spese
     const getTotalExpenses = (): number => {
         return getDisplayedExpenses().reduce((total, expense) => total + expense.amount, 0);
+    };
+
+    const getTotalIncomes = (): number => {
+        if (!incomes) return 0;
+        return incomes.incomes?.reduce((total, income) => total + income.amount, 0) || 0;
+    }
+
+    const getTotalCredito = (): number => {
+        const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find((c: CardType) => c.id === selectedCard);
+        if (selectedCard === 'all') {
+            // Somma tutti i crediti iniziali delle carte
+            const totalCreditoIniziale = cards?.cards?.reduce((sum, c) => sum + (c.credito_iniziale || 0), 0) || 0;
+            return totalCreditoIniziale - getTotalExpenses() + getTotalIncomes();
+        }
+        if (!selectedCardObj) return 0;
+        return selectedCardObj.credito_iniziale - getTotalExpenses() + getTotalIncomes();
     };
 
     // Gestione cambio carta (utilizzata da CardSelector)
@@ -116,7 +266,7 @@ const Expenses: React.FC = () => {
             card_id: selectedCard === 'all' ? undefined : selectedCard
         };
 
-        setAllExpenses(prev => ([...prev, newExpense]));
+        setAllExpenses(prev => ([newExpense, ...prev]));
 
         addExpense({ variables: { expenseInput: newExpense } });
 
@@ -192,6 +342,12 @@ const Expenses: React.FC = () => {
                         <Typography variant="body1" color="text.secondary">
                             Spese totali: €{getTotalExpenses().toFixed(2)}
                         </Typography>
+                        <Typography variant="body1" color="text.secondary">
+                            Entrate totali: €{getTotalIncomes().toFixed(2)}
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                            Credito attuale: €{getTotalCredito().toFixed(2)}
+                        </Typography>
                         <Typography variant="body2" color="text.secondary">
                             Numero spese: {getDisplayedExpenses().length}
                         </Typography>
@@ -249,22 +405,7 @@ const Expenses: React.FC = () => {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {!loading && !error &&
-                                        getDisplayedExpenses().map((expense: Expense) => (
-                                            <React.Fragment key={expense.id}>
-                                                <ExpandedExpenseRow
-                                                    expense={expense}
-                                                    selectedCard={selectedCard}
-                                                    expanded={expandedRow === expense.id}
-                                                    selected={selectedIds.includes(expense.id ?? '')}
-                                                    onSelect={() => handleSelect(expense.id ?? '')}
-                                                    onDelete={() => handleDeleteExpense(expense.id)}
-                                                    onExpand={() => handleExpandRow(expense.id ?? '')}
-                                                    cards={cards?.cards}
-                                                />
-                                            </React.Fragment>
-                                        ))
-                                    }
+                                    {renderedExpenseRows}
                                     {getDisplayedExpenses().length === 0 && (
                                         <TableRow>
                                             <TableCell colSpan={selectedCard === 'all' ? 7 : 6} align="center" sx={{ py: 4 }}>

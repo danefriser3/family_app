@@ -56,9 +56,11 @@ interface ExpandedExpenseRowProps {
   onDelete: () => void;
   onExpand: () => void;
   cards?: Card[];
+  // Differenza tra credito iniziale e somma delle spese con id inferiore più quella attuale
+  creditDeltaAfter?: number;
 }
 
-const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, selectedCard, expanded, selected, onSelect, onDelete, onExpand, cards }) => {
+const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, selectedCard, expanded, selected, onSelect, onDelete, onExpand, cards, creditDeltaAfter }) => {
   const colSpan = selectedCard === 'all' ? 7 : 6;
   const [products, setProducts] = useState<ExpenseProduct[]>([]);
   const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price'>>({ name: '', quantity: 1, price: 0 });
@@ -134,6 +136,11 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
         hover
         onClick={onExpand}
         style={{ cursor: 'pointer', background: expanded ? '#f5f5f5' : undefined }}
+        title={
+          creditDeltaAfter === undefined
+            ? undefined
+            : `Disponibile tenendo conto delle spese con id inferiore + questa: € ${creditDeltaAfter.toFixed(2)}`
+        }
       >
         <TableCell padding="checkbox">
           <Checkbox
