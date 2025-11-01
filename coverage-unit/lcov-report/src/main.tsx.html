@@ -23,30 +23,30 @@
         <div class='clearfix'>
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>0/18</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>1/1</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Functions</span>
-                <span class='fraction'>0/1</span>
+                <span class='fraction'>0/0</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">0% </span>
+                <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>0/18</span>
+                <span class='fraction'>17/17</span>
             </div>
         
             
@@ -61,7 +61,7 @@
             </div>
         </template>
     </div>
-    <div class='status-line low'></div>
+    <div class='status-line high'></div>
     <pre><table class="coverage">
 <tr><td class="line-count quiet"><a name='L1'></a><a href='#L1'>1</a>
 <a name='L2'></a><a href='#L2'>2</a>
@@ -85,50 +85,53 @@
 <a name='L20'></a><a href='#L20'>20</a>
 <a name='L21'></a><a href='#L21'>21</a>
 <a name='L22'></a><a href='#L22'>22</a>
-<a name='L23'></a><a href='#L23'>23</a></td><td class="line-coverage quiet"><span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
+<a name='L23'></a><a href='#L23'>23</a>
+<a name='L24'></a><a href='#L24'>24</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
 <span class="cline-any cline-neutral">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-no">&nbsp;</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js"><span class="cstat-no" title="statement not covered" >import { StrictMode } from 'react'<span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span>
-<span class="cstat-no" title="statement not covered" >import { createRoot } from 'react-dom/client'</span>
-<span class="cstat-no" title="statement not covered" >import './index.css'</span>
-<span class="cstat-no" title="statement not covered" >import App from './App.tsx'</span>
-<span class="cstat-no" title="statement not covered" >import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'</span>
-<span class="cstat-no" title="statement not covered" >import { ApolloProvider } from '@apollo/client/react'</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-yes">1x</span>
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { StrictMode } from 'react'
+import { createRoot } from 'react-dom/client'
+import './index.css'
+import App from './App.tsx'
+import { ApolloClient, InMemoryCache, HttpLink } from '@apollo/client'
+import { ApolloProvider } from '@apollo/client/react'
 &nbsp;
 // Prefer Vite env var if provided; fallback to current origin
-<span class="cstat-no" title="statement not covered" >const serverBaseUrl = (import.meta.env.VITE_SERVER_URL as string | undefined) ?? window.location.origin</span>
+/* c8 ignore next */
+const serverBaseUrl = (import.meta.env.VITE_SERVER_URL as string | undefined) ?? globalThis.location.origin
 &nbsp;
-<span class="cstat-no" title="statement not covered" >const client = new ApolloClient({</span>
-<span class="cstat-no" title="statement not covered" >  link: new HttpLink({ uri: `${serverBaseUrl}graphql` }), // Cambia se il tuo server è su una porta diversa</span>
-<span class="cstat-no" title="statement not covered" >  cache: new InMemoryCache(),</span>
-<span class="cstat-no" title="statement not covered" >})</span>
+const client = new ApolloClient({
+  link: new HttpLink({ uri: `${serverBaseUrl}graphql` }), // Cambia se il tuo server è su una porta diversa
+  cache: new InMemoryCache(),
+})
 &nbsp;
-<span class="cstat-no" title="statement not covered" >createRoot(document.getElementById('root')!).render(</span>
-<span class="cstat-no" title="statement not covered" >  &lt;StrictMode&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;ApolloProvider client={client}&gt;</span>
-<span class="cstat-no" title="statement not covered" >      &lt;App /&gt;</span>
-<span class="cstat-no" title="statement not covered" >    &lt;/ApolloProvider&gt;</span>
-<span class="cstat-no" title="statement not covered" >  &lt;/StrictMode&gt;,</span>
-<span class="cstat-no" title="statement not covered" >)</span>
+createRoot(document.getElementById('root')!).render(
+  &lt;StrictMode&gt;
+    &lt;ApolloProvider client={client}&gt;
+      &lt;App /&gt;
+    &lt;/ApolloProvider&gt;
+  &lt;/StrictMode&gt;,
+)
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -136,7 +139,7 @@
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank" rel="noopener noreferrer">istanbul</a>
-                at 2025-10-01T12:11:39.903Z
+                at 2025-11-01T12:23:31.096Z
             </div>
         <script src="../prettify.js"></script>
         <script>
