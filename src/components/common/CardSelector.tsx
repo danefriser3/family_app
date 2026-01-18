@@ -8,6 +8,8 @@ import {
   IconButton,
   SelectChangeEvent
 } from '@mui/material';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import Sync from '@mui/icons-material/Sync';
 import { Card as CardType } from '../../types/graphql';
 
@@ -19,13 +21,16 @@ export interface CardSelectorProps {
 }
 
 export const CardSelector: React.FC<CardSelectorProps> = ({ cards, selectedCard, onChange, onRefresh }) => {
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const handleChange = (event: SelectChangeEvent<string>) => {
     onChange(event.target.value);
   };
 
   return (
-    <Box display="flex" alignItems="center" gap={1}>
-      <FormControl fullWidth sx={{ maxWidth: 300 }}>
+    <Box display="flex" alignItems="center" gap={1} sx={{ width: '100%' }}>
+      <FormControl fullWidth sx={{ maxWidth: isMobile ? '100%' : 300, flexGrow: 1 }}>
         <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
         <Select
           labelId="card-select-label"
@@ -65,7 +70,7 @@ export const CardSelector: React.FC<CardSelectorProps> = ({ cards, selectedCard,
         </Select>
       </FormControl>
       {onRefresh && (
-        <IconButton onClick={onRefresh} aria-label="refresh">
+        <IconButton onClick={onRefresh} aria-label="refresh" sx={{ ml: 'auto', flexShrink: 0 }}>
           <Sync />
         </IconButton>
       )}

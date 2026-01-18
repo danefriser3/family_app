@@ -33,6 +33,7 @@ interface ExpenseProduct {
   id: string;
   name: string;
   quantity: number;
+  note: string;
   price: number;
 }
 interface GetExpenseProductsData {
@@ -63,7 +64,7 @@ interface ExpandedExpenseRowProps {
 const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, selectedCard, expanded, selected, onSelect, onDelete, onExpand, cards, creditDeltaAfter }) => {
   const colSpan = selectedCard === 'all' ? 7 : 6;
   const [products, setProducts] = useState<ExpenseProduct[]>([]);
-  const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price'>>({ name: '', quantity: 1, price: 0 });
+  const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price' | 'note'>>({ name: '', quantity: 1, price: 0, note: '' });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [getExpenseProducts, { data: productsData, loading: loadingProducts }] = useLazyQuery<GetExpenseProductsData>(GET_EXPENSE_PRODUCTS, { fetchPolicy: 'network-only' });
   const [addExpenseProduct] = useMutation(ADD_EXPENSE_PRODUCT);
@@ -102,11 +103,12 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
         product: {
           name: newProduct.name,
           quantity: Number(newProduct.quantity),
-          price: Number(newProduct.price)
+          price: Number(newProduct.price),
+          note: newProduct.note
         }
       }
     });
-    setNewProduct({ name: '', quantity: 1, price: 0 });
+    setNewProduct({ name: '', quantity: 1, price: 0, note: '' });
     // Dopo aggiunta prodotto, rilancia la query
     getExpenseProducts({ variables: { expenseId: expense.id } });
   };
@@ -213,6 +215,16 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             sx={{ flexGrow: 1 }}
                           />
                           <TextField
+                            label="Nota"
+                            size="small"
+                            required
+                            name="note"
+                            value={newProduct.note}
+                            onChange={e => setNewProduct(p => ({ ...p, note: e.target.value }))}
+                            fullWidth
+                            sx={{ flexGrow: 1 }}
+                          />
+                          <TextField
                             label="Quantità"
                             size="small"
                             type="number"
@@ -254,6 +266,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                         <TableHead>
                           <TableRow>
                             <TableCell>Nome</TableCell>
+                            <TableCell>Nota</TableCell>
                             <TableCell>Quantità</TableCell>
                             <TableCell>Prezzo</TableCell>
                           </TableRow>
@@ -269,12 +282,13 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                           {products.map((prod: ExpenseProduct) => (
                             <TableRow key={prod.id}>
                               <TableCell>{prod.name}</TableCell>
+                              <TableCell>{prod.note}</TableCell>
                               <TableCell>{prod.quantity}</TableCell>
                               <TableCell>€ {prod.price}</TableCell>
                             </TableRow>
                           ))}
                           <TableRow>
-                            <TableCell colSpan={2} align="right"><strong>Totale Prodotti:</strong></TableCell>
+                            <TableCell colSpan={3} align="right"><strong>Totale Prodotti:</strong></TableCell>
                             <TableCell><strong>€ {products.reduce((sum, prod) => sum + prod.price, 0).toFixed(2)}</strong></TableCell>
                           </TableRow>
                         </TableBody>
