@@ -11,11 +11,15 @@ const drawerWidth = 240;
 export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(!isMobile);
+  // Detect iPhone 13 Pro Max (portrait and landscape) to default close
+  const isIPhone13PMPortrait = useMediaQuery('(device-width: 428px) and (device-height: 926px)');
+  const isIPhone13PMLandscape = useMediaQuery('(device-width: 926px) and (device-height: 428px)');
+  const isIPhone13PM = isIPhone13PMPortrait || isIPhone13PMLandscape;
+  const [sidebarOpen, setSidebarOpen] = React.useState<boolean>(!isMobile && !isIPhone13PM);
 
   React.useEffect(() => {
-    setSidebarOpen(!isMobile);
-  }, [isMobile]);
+    setSidebarOpen(!isMobile && !isIPhone13PM);
+  }, [isMobile, isIPhone13PM]);
 
   return (
     <Box sx={{ display: 'flex' }}>
