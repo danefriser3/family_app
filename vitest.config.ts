@@ -3,21 +3,15 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  resolve: {
-    alias: [
-      // Stub all deep icon imports to avoid opening many files on Windows (EMFILE)
-      { find: /^@mui\/icons-material\/.*/, replacement: '/src/test/__mocks__/mui-icon-stub.tsx' },
-    ],
-  },
   test: {
     globals: true,
     environment: 'jsdom',
     setupFiles: ['./vitest.setup.ts'],
     css: true,
-    pool: 'threads',
+    pool: 'forks',
     poolOptions: {
-      threads: {
-        singleThread: true,
+      forks: {
+        singleFork: true,
       },
     },
     coverage: {
