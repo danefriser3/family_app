@@ -34,7 +34,7 @@ import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
 import { GetIncomesData } from './Incomes';
-import { Delete, DeleteOutline, DeleteOutlineSharp } from '@mui/icons-material';
+import { DeleteOutline } from '@mui/icons-material';
 export interface GetCardsData {
     cards: CardType[];
 }
