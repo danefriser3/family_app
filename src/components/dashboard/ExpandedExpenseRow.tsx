@@ -217,7 +217,6 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                           <TextField
                             label="Nota"
                             size="small"
-                            required
                             name="note"
                             value={newProduct.note}
                             onChange={e => setNewProduct(p => ({ ...p, note: e.target.value }))}
