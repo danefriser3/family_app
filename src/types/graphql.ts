@@ -20,3 +20,16 @@ export interface Expense {
   category: string;
   card_id?: string;
 }
+
+// Query result types
+export interface GetCardsData {
+  cards: Card[];
+}
+
+export interface GetExpensesData {
+  expenses: Expense[];
+}
+
+export interface GetIncomesData {
+  incomes: Expense[];
+}

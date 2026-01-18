@@ -29,18 +29,11 @@ import useMediaQuery from '@mui/material/useMediaQuery';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
-import { Card as CardType } from '../types/graphql';
+import { Card as CardType, GetCardsData, GetExpensesData, GetIncomesData } from '../types/graphql';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
-import { GetIncomesData } from './Incomes';
 import { DeleteOutline } from '@mui/icons-material';
-export interface GetCardsData {
-    cards: CardType[];
-}
-export interface GetExpensesData {
-    expenses: Expense[];
-}
 
 // Helper: compute a comparable key for the calendar day (YYYY-MM-DD)
 const getDayKey = (d?: string | number): string => {
