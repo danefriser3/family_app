@@ -60,6 +60,7 @@ export const ADD_EXPENSE_PRODUCT = gql`
       name
       quantity
       price
+      note
     }
   }
 `;
