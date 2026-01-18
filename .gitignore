@@ -27,3 +27,4 @@ dist-ssr
 coverage
 coverage-unit
 coverage-e2e
+.nyc_output
