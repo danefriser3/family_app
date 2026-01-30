@@ -1,5 +1,4 @@
 import { useQuery } from "@apollo/client/react";
-import { useState } from "react";
 import { GET_ALDI_PRODUCTS } from "../graphql/queries";
 import { AldiProduct } from "../types/graphql";
 import { Card, CardContent, CardHeader, Stack, Typography } from "@mui/material";
