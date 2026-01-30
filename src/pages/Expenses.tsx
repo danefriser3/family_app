@@ -17,22 +17,23 @@ import {
     CardContent,
     Divider,
     Checkbox,
-    ButtonGroup
+    ButtonGroup,
+    IconButton
 } from '@mui/material';
+import Accordion from '@mui/material/Accordion';
+import AccordionSummary from '@mui/material/AccordionSummary';
+import AccordionDetails from '@mui/material/AccordionDetails';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import { useTheme } from '@mui/material/styles';
+import useMediaQuery from '@mui/material/useMediaQuery';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
-import { Card as CardType } from '../types/graphql';
+import { Card as CardType, GetCardsData, GetExpensesData, GetIncomesData } from '../types/graphql';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
-import { GetIncomesData } from './Incomes';
-export interface GetCardsData {
-    cards: CardType[];
-}
-export interface GetExpensesData {
-    expenses: Expense[];
-}
+import { DeleteOutline } from '@mui/icons-material';
 
 // Helper: compute a comparable key for the calendar day (YYYY-MM-DD)
 const getDayKey = (d?: string | number): string => {
@@ -110,6 +111,8 @@ function buildExpenseRows(params: {
 }
 
 const Expenses: React.FC = () => {
+    const theme = useTheme();
+    const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
     const [selectedCard, setSelectedCard] = useState<string>('all');
     const [description, setDescription] = useState('');
@@ -368,55 +371,85 @@ const Expenses: React.FC = () => {
                     </Card>
                     {/* Form per aggiungere spese - mostrato solo se una carta specifica è selezionata */}
                     {selectedCard !== 'all' && (
-                        <AddTransactionForm
-                            title="Aggiungi Spesa"
-                            cardName={cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
-                            description={description}
-                            amount={amount}
-                            category={category}
-                            date={date}
-                            onDescriptionChange={setDescription}
-                            onAmountChange={setAmount}
-                            onCategoryChange={setCategory}
-                            onDateChange={setDate}
-                            onSubmit={handleAddExpense}
-                        />
+                        isMobile ? (
+                            <Accordion defaultExpanded={false} elevation={0}>
+                                <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                                    <Typography variant="h6" className="font-semibold">
+                                        Aggiungi Spesa
+                                    </Typography>
+                                </AccordionSummary>
+                                <AccordionDetails>
+                                    <AddTransactionForm
+                                        title="Aggiungi Spesa"
+                                        cardName={cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
+                                        description={description}
+                                        amount={amount}
+                                        category={category}
+                                        date={date}
+                                        onDescriptionChange={setDescription}
+                                        onAmountChange={setAmount}
+                                        onCategoryChange={setCategory}
+                                        onDateChange={setDate}
+                                        onSubmit={handleAddExpense}
+                                    />
+                                </AccordionDetails>
+                            </Accordion>
+                        ) : (
+                            <AddTransactionForm
+                                title="Aggiungi Spesa"
+                                cardName={cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
+                                description={description}
+                                amount={amount}
+                                category={category}
+                                date={date}
+                                onDescriptionChange={setDescription}
+                                onAmountChange={setAmount}
+                                onCategoryChange={setCategory}
+                                onDateChange={setDate}
+                                onSubmit={handleAddExpense}
+                            />
+                        )
                     )}
 
-                    {<TableContainer component={Paper}>
-                        <Stack direction={'column'} spacing={2} sx={{ p: 2 }}>
-                            <Table size='small'>
-                                <TableHead>
-                                    <TableRow>
-                                        <TableCell padding="checkbox">
-                                            {getTotalExpenses() > 0 && !loading && !error && <Checkbox
-                                                disabled={getTotalExpenses() === 0 && loading && !!error}
-                                                indeterminate={selectedIds.length > 0 && selectedIds.length < ((expenses?.expenses?.length) ?? 0)}
-                                                checked={((expenses?.expenses?.length) ?? 0) > 0 && selectedIds.length === ((expenses?.expenses?.length) ?? 0)}
-                                                onChange={handleSelectAll}
-                                            />}
-                                        </TableCell>
-                                        <TableCell>Descrizione</TableCell>
-                                        <TableCell align="center">Categoria</TableCell>
-                                        <TableCell align="right">Importo (€)</TableCell>
-                                        <TableCell align="center">Data</TableCell>
-                                        {selectedCard === 'all' && <TableCell align="center">Carta</TableCell>}
-                                        <TableCell align="right">Azioni</TableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {renderedExpenseRows}
-                                    {getDisplayedExpenses().length === 0 && (
-                                        <TableRow>
-                                            <TableCell colSpan={selectedCard === 'all' ? 7 : 6} align="center" sx={{ py: 4 }}>
-                                                <Typography color="text.secondary" align='center'>
-                                                    Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
-                                                </Typography>
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
+                    {isMobile ? (
+                        <Stack direction={'column'} spacing={2} >
+                            {getDisplayedExpenses().map((e) => (
+                                <Card key={e.id} variant="outlined">
+                                    <CardContent>
+                                        <Stack direction="column" alignItems="end" spacing={0} >
+                                            <Stack direction="row" spacing={2} alignItems="center" width="100%" justifyContent="space-between">
+                                                <Checkbox
+                                                    checked={selectedIds.includes(e.id ?? '')}
+                                                    onChange={() => handleSelect(e.id ?? '')}
+                                                />
+                                                <IconButton size="small" color="error" onClick={() => handleDeleteExpense(e.id)}>
+                                                    <DeleteOutline />
+                                                </IconButton>
+                                            </Stack>
+                                            <Stack direction="column" alignItems="start" spacing={1} justifyContent="space-between" width="100%">
+                                                <Stack direction="row" justifyContent="space-between" width="100%">
+                                                    <Typography variant="h6">{e.description}</Typography>
+                                                    <Typography variant="h6" color="error">€ {e.amount.toFixed(2)}</Typography>
+                                                </Stack>
+                                                <Typography variant="body2" color="text.secondary">Categoria: {e.category || '-'}</Typography>
+                                                <Typography variant="body2" color="text.secondary">Data: {new Date(Number(e.date)).toLocaleDateString()}</Typography>
+                                                {selectedCard === 'all' && (
+                                                    <Typography variant="body2" color="text.secondary">
+                                                        Carta: {cards?.cards.find((c: CardType) => c.id === e.card_id)?.name || '-'}
+                                                    </Typography>
+                                                )}
+                                            </Stack>
+                                        </Stack>
+                                        <Stack direction="row" justifyContent="flex-end" sx={{ mt: 1 }}>
+                                        </Stack>
+                                    </CardContent>
+                                </Card>
+                            ))}
+                            {getDisplayedExpenses().length === 0 && (
+                                <Typography color="text.secondary" align='center' sx={{ py: 4 }}>
+                                    Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
+                                </Typography>
+                            )}
                             {selectedIds.length > 0 && (
                                 <ButtonGroup>
                                     <Button
@@ -425,12 +458,61 @@ const Expenses: React.FC = () => {
                                         onClick={handleDeleteSelected}
                                         disabled={selectedIds.length === 0}
                                     >
-                                        Elimina
+                                        Elimina selezionate
                                     </Button>
                                 </ButtonGroup>
                             )}
                         </Stack>
-                    </TableContainer>}
+                    ) : (
+                        <TableContainer component={Paper}>
+                            <Stack direction={'column'} spacing={2} sx={{ p: 2 }}>
+                                <Table size='small'>
+                                    <TableHead>
+                                        <TableRow>
+                                            <TableCell padding="checkbox">
+                                                {getTotalExpenses() > 0 && !loading && !error && <Checkbox
+                                                    disabled={getTotalExpenses() === 0 && loading && !!error}
+                                                    indeterminate={selectedIds.length > 0 && selectedIds.length < ((expenses?.expenses?.length) ?? 0)}
+                                                    checked={((expenses?.expenses?.length) ?? 0) > 0 && selectedIds.length === ((expenses?.expenses?.length) ?? 0)}
+                                                    onChange={handleSelectAll}
+                                                />}
+                                            </TableCell>
+                                            <TableCell>Descrizione</TableCell>
+                                            <TableCell align="center">Categoria</TableCell>
+                                            <TableCell align="right">Importo (€)</TableCell>
+                                            <TableCell align="center">Data</TableCell>
+                                            {selectedCard === 'all' && <TableCell align="center">Carta</TableCell>}
+                                            <TableCell align="right">Azioni</TableCell>
+                                        </TableRow>
+                                    </TableHead>
+                                    <TableBody>
+                                        {renderedExpenseRows}
+                                        {getDisplayedExpenses().length === 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={selectedCard === 'all' ? 7 : 6} align="center" sx={{ py: 4 }}>
+                                                    <Typography color="text.secondary" align='center'>
+                                                        Nessuna spesa trovata per {selectedCard === 'all' ? 'tutte le carte' : cards?.cards.find((c: CardType) => c.id === selectedCard)?.name}
+                                                    </Typography>
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </TableBody>
+                                </Table>
+                                {selectedIds.length > 0 && (
+                                    <ButtonGroup>
+                                        <Button
+                                            size='small'
+                                            color="error"
+                                            onClick={handleDeleteSelected}
+                                            disabled={selectedIds.length === 0}
+                                        >
+                                            Elimina
+                                        </Button>
+                                    </ButtonGroup>
+                                )}
+                            </Stack>
+                        </TableContainer>
+                    )}
                 </Stack>
             </CardContent>
         </Card >
