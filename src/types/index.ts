@@ -126,7 +126,7 @@ export interface ThemeColors {
 export type TabType = 
   | 'dashboard' 
   | 'analytics' 
-  | 'users' 
+  | 'aldi' 
   | 'inventory' 
   | 'reports' 
   | 'profile' 

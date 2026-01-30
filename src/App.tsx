@@ -24,7 +24,7 @@ function App() {
         return <Expenses />;
       case 'incomes':
         return <Incomes />;
-      case 'users':
+      case 'aldi':
         return <Aldi />;
       case 'inventory':
         return <div className="p-8 text-center text-gray-500">Inventario - In sviluppo</div>;
