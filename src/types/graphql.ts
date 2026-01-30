@@ -20,3 +20,9 @@ export interface Expense {
   category: string;
   card_id?: string;
 }
+
+export interface AldiProduct {
+  id: string;
+  name: string;
+  price: number;
+}
