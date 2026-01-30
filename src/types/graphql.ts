@@ -26,3 +26,16 @@ export interface AldiProduct {
   name: string;
   price: number;
 }
+
+// Query result types
+export interface GetCardsData {
+  cards: Card[];
+}
+
+export interface GetExpensesData {
+  expenses: Expense[];
+}
+
+export interface GetIncomesData {
+  incomes: Expense[];
+}

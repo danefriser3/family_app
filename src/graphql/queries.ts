@@ -19,6 +19,7 @@ export const GET_EXPENSE_PRODUCTS = gql`
       id
       name
       quantity
+      note
       price
     }
   }

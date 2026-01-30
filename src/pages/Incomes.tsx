@@ -24,14 +24,10 @@ import { GET_CARDS, GET_INCOMES } from '../graphql/queries';
 import { ADD_INCOME, DELETE_INCOME, DELETE_INCOMES, UPDATE_CARD } from '../graphql/mutations';
 import Delete from '@mui/icons-material/Delete';
 import { Expense as Income, formatDateYYYYMMDDLocal } from '../types';
-import { GetCardsData } from './Expenses';
+import { GetCardsData, GetIncomesData } from '../types/graphql';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
-
-export interface GetIncomesData {
-  incomes: Income[];
-}
 
 const Incomes = () => {
   const [selectedCard, setSelectedCard] = useState<string>('all');
