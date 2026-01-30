@@ -35,9 +35,9 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Entrate' }))
     expect(await screen.findByText('Gestione Entrate')).toBeInTheDocument()
 
-    // Users
-    await user.click(screen.getByRole('button', { name: 'Utenti' }))
-    expect(await screen.findByText('Gestione Utenti - In sviluppo')).toBeInTheDocument()
+    // Aldi
+    await user.click(screen.getByRole('button', { name: 'Aldi' }))
+    expect(await screen.findByText('Prodotti Aldi')).toBeInTheDocument()
 
     // Inventory
     await user.click(screen.getByRole('button', { name: 'Inventario' }))

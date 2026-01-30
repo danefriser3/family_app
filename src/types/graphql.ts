@@ -21,6 +21,12 @@ export interface Expense {
   card_id?: string;
 }
 
+export interface AldiProduct {
+  id: string;
+  name: string;
+  price: number;
+}
+
 // Query result types
 export interface GetCardsData {
   cards: Card[];

@@ -33,7 +33,7 @@ import { Card as CardType, GetCardsData, GetExpensesData, GetIncomesData } from 
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
-import { DeleteOutline } from '@mui/icons-material';
+import DeleteOutline from '@mui/icons-material/DeleteOutline';
 
 // Helper: compute a comparable key for the calendar day (YYYY-MM-DD)
 const getDayKey = (d?: string | number): string => {

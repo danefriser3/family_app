@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import { TabType } from './types';
 import Incomes from './pages/Incomes';
+import Aldi from './pages/Aldi';
 
 function App() {
   const [activeTab, setActiveTab] = useState<TabType>('dashboard');
@@ -23,8 +24,8 @@ function App() {
         return <Expenses />;
       case 'incomes':
         return <Incomes />;
-      case 'users':
-        return <div className="p-8 text-center text-gray-500">Gestione Utenti - In sviluppo</div>;
+      case 'aldi':
+        return <Aldi />;
       case 'inventory':
         return <div className="p-8 text-center text-gray-500">Inventario - In sviluppo</div>;
       case 'reports':

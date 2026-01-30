@@ -59,3 +59,13 @@ export const GET_EXPENSES = gql`
     }
   }
 `;
+
+export const GET_ALDI_PRODUCTS = gql`
+  query GetAldiProducts {
+    aldiProducts {
+      id
+      name
+      price
+    }
+  }
+`;

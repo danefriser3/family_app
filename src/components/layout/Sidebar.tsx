@@ -14,7 +14,6 @@ import {
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import DashboardIcon from '@mui/icons-material/Dashboard';
-import PeopleIcon from '@mui/icons-material/People';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
 import AssessmentIcon from '@mui/icons-material/Assessment';
@@ -22,6 +21,7 @@ import InventoryIcon from '@mui/icons-material/Inventory';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import { SidebarProps, MenuItem } from '../../types';
+import ShoppingCartSharp from '@mui/icons-material/ShoppingCartSharp';
 
 const drawerWidth = 240;
 
@@ -29,7 +29,7 @@ const menuItems: MenuItem[] = [
   { id: 'dashboard', label: 'Dashboard', icon: <DashboardIcon /> },
   { id: 'expenses', label: 'Spese', icon: <BarChartIcon /> },
   { id: 'incomes', label: 'Entrate', icon: <AttachMoneyIcon /> },
-  { id: 'users', label: 'Utenti', icon: <PeopleIcon /> },
+  { id: 'aldi', label: 'Aldi', icon: <ShoppingCartSharp /> },
   { id: 'inventory', label: 'Inventario', icon: <InventoryIcon /> },
   { id: 'reports', label: 'Report', icon: <AssessmentIcon /> },
   { id: 'profile', label: 'Profilo', icon: <AccountCircleIcon /> },
