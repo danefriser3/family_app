@@ -25,6 +25,12 @@ export interface AldiProduct {
   id: string;
   name: string;
   price: number;
+  category: string;
+  image: string;
+}
+
+export interface AldiCategory {
+  aldiCategories: { category: string }[];
 }
 
 // Query result types

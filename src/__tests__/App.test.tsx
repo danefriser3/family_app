@@ -2,6 +2,13 @@ import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+
+// Mock MUI Icons before any other imports to prevent EMFILE
+vi.mock('@mui/icons-material', () => {
+  const Stub = (props: any) => React.createElement('svg', { 'data-testid': 'mui-icon-stub', ...props })
+  return new Proxy({}, { get: () => Stub })
+})
 
 // Mock Apollo hooks globally for App tree to avoid real network
 vi.mock('@apollo/client', () => ({
@@ -18,14 +25,22 @@ import App from '../App'
 
 describe('App', () => {
   it('renders layout and dashboard by default', () => {
-    render(<App />)
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    )
     expect(screen.getByText('Admin Panel')).toBeInTheDocument()
     expect(screen.getByText('Dashboard Overview')).toBeInTheDocument()
   })
 
   it('navigates to each tab via the sidebar and renders the correct content', async () => {
     const user = userEvent.setup()
-    render(<App />)
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    )
 
     // Expenses
     await user.click(screen.getByRole('button', { name: 'Spese' }))
@@ -35,7 +50,7 @@ describe('App', () => {
     await user.click(screen.getByRole('button', { name: 'Entrate' }))
     expect(await screen.findByText('Gestione Entrate')).toBeInTheDocument()
 
-    // Aldi
+    // Users
     await user.click(screen.getByRole('button', { name: 'Aldi' }))
     expect(await screen.findByText('Prodotti Aldi')).toBeInTheDocument()
 

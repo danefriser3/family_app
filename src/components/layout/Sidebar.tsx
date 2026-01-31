@@ -10,9 +10,10 @@ import {
   Divider,
   Box,
   Typography,
+  useMediaQuery,
+  useTheme,
 } from '@mui/material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+import { useNavigate } from 'react-router-dom';
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import BarChartIcon from '@mui/icons-material/BarChart';
 import SettingsIcon from '@mui/icons-material/Settings';
@@ -20,7 +21,7 @@ import AssessmentIcon from '@mui/icons-material/Assessment';
 import InventoryIcon from '@mui/icons-material/Inventory';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
-import { SidebarProps, MenuItem } from '../../types';
+import { MenuItem, SidebarProps } from '../../types';
 import ShoppingCartSharp from '@mui/icons-material/ShoppingCartSharp';
 
 const drawerWidth = 240;
@@ -36,10 +37,14 @@ const menuItems: MenuItem[] = [
   { id: 'settings', label: 'Impostazioni', icon: <SettingsIcon /> },
 ];
 
-export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, open = true, onClose }) => {
+export const Sidebar: React.FC<SidebarProps> = ({ activeTab, open = true, onClose }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const navigate = useNavigate();
 
+  const handleNavigation = (path: string) => {
+    navigate(`/${path}`);
+  };
   return (
     <Drawer
       variant={isMobile ? 'temporary' : 'persistent'}
@@ -67,7 +72,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ activeTab, onTabChange, open =
           <ListItem key={item.id} disablePadding>
             <ListItemButton
               selected={activeTab === item.id}
-              onClick={() => onTabChange(item.id)}
+              onClick={() => handleNavigation(item.id)}
               sx={{
                 '&.Mui-selected': {
                   backgroundColor: '#e3f2fd',
