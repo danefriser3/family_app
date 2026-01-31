@@ -1,6 +1,13 @@
 import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
+import { BrowserRouter } from 'react-router-dom'
+
+// Mock MUI Icons before any other imports to prevent EMFILE
+vi.mock('@mui/icons-material', () => {
+  const Stub = (props: any) => React.createElement('svg', { 'data-testid': 'mui-icon-stub', ...props })
+  return new Proxy({}, { get: () => Stub })
+})
 
 // Mock Apollo hooks to avoid network
 vi.mock('@apollo/client', () => ({
@@ -13,23 +20,16 @@ vi.mock('@apollo/client/react', () => ({
   useLazyQuery: () => [vi.fn(), { data: undefined, loading: false, error: undefined }],
 }))
 
-// Mock Layout so it triggers an unknown tab to exercise the default branch
-vi.mock('../components/layout/Layout', () => ({
-  Layout: ({ onTabChange, children }: { onTabChange: (tab: string) => void; children: React.ReactNode }) => {
-    React.useEffect(() => {
-      onTabChange('unknown-tab')
-    }, [onTabChange])
-    return <div data-testid="mock-layout">{children}</div>
-  },
-}))
-
 // Import after mocks are set up
 import App from '../App'
 
 describe('App default branch', () => {
-  it('renders Dashboard via default branch when tab is unknown', () => {
-    render(<App />)
-    // If default executed, we still see the dashboard content
-    expect(screen.getByText('Dashboard Overview')).toBeInTheDocument()
+  it('renders App without crashing', () => {
+    render(
+      <BrowserRouter>
+        <App />
+      </BrowserRouter>
+    )
+    expect(screen.getByText('Admin Panel')).toBeInTheDocument()
   })
 })

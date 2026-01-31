@@ -66,6 +66,16 @@ export const GET_ALDI_PRODUCTS = gql`
       id
       name
       price
+      category
+      image
+    }
+  }
+`;
+
+export const GET_ALDI_CATEGORIES = gql`
+  query GetAldiCategories {
+    aldiCategories {
+      category
     }
   }
 `;
