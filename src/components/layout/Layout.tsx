@@ -4,11 +4,10 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { Header } from './Header';
 import { Sidebar } from './Sidebar';
-import { LayoutProps } from '../../types';
 
 const drawerWidth = 240;
 
-export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange }) => {
+export const Layout: React.FC<{ children: React.ReactNode; activeTab: string }> = ({ children, activeTab }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   // Detect iPhone 13 Pro Max (portrait and landscape) to default close
@@ -20,16 +19,10 @@ export const Layout: React.FC<LayoutProps> = ({ children, activeTab, onTabChange
   React.useEffect(() => {
     setSidebarOpen(!isMobile && !isIPhone13PM);
   }, [isMobile, isIPhone13PM]);
-
   return (
     <Box sx={{ display: 'flex' }}>
-      <Header isSidebarOpen={!isMobile && sidebarOpen} onToggleSidebar={() => setSidebarOpen((prev) => !prev)} />
-      <Sidebar
-        activeTab={activeTab}
-        onTabChange={onTabChange}
-        open={sidebarOpen}
-        onClose={() => setSidebarOpen(false)}
-      />
+      <Header />
+      <Sidebar activeTab={activeTab} />
       <Box
         component="main"
         sx={{

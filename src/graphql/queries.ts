@@ -66,8 +66,8 @@ export const GET_ALDI_PRODUCTS = gql`
       id
       name
       price
-      image
       category
+      image
     }
   }
 `;

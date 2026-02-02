@@ -44,7 +44,6 @@ export interface Expense {
 
 export interface SidebarProps {
   activeTab: string;
-  onTabChange: (tab: string) => void;
   open?: boolean;
   onClose?: () => void;
 }
@@ -52,7 +51,6 @@ export interface SidebarProps {
 export interface LayoutProps {
   children: React.ReactNode;
   activeTab: string;
-  onTabChange: (tab: string) => void;
 }
 
 export interface MenuItem {
