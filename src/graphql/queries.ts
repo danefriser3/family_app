@@ -21,6 +21,8 @@ export const GET_EXPENSE_PRODUCTS = gql`
       quantity
       note
       price
+      item_type
+      scadenza
     }
   }
 `;
@@ -68,6 +70,7 @@ export const GET_ALDI_PRODUCTS = gql`
       price
       category
       image
+      sku
     }
   }
 `;
@@ -76,6 +79,19 @@ export const GET_ALDI_CATEGORIES = gql`
   query GetAldiCategories {
     aldiCategories {
       category
+    }
+  }
+`;
+
+export const GET_ALDI_PRODUCT_BY_SKU = gql`
+  query GetAldiProductBySku($sku: String!) {
+    aldiProduct(sku: $sku) {
+      name
+      price
+      category
+      description
+      image
+      sku
     }
   }
 `;
