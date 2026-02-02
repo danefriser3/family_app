@@ -101,7 +101,7 @@ const Aldi = () => {
                             endAdornment={<InputAdornment position="start"><IconButton size="small" onClick={() => setCategory('tutti')} ><Clear fontSize="small" /></IconButton></InputAdornment>}
                         >
                             <MenuItem value={'tutti'}>Tutti</MenuItem>
-                            {categoriesData?.aldiCategories.map((cat: { category: string }) => (
+                            {categoriesData?.aldiCategories?.map((cat: { category: string }) => (
                                 <MenuItem key={crypto.randomUUID()} value={cat.category}>{cat.category}</MenuItem>
                             ))}
                         </Select>
