@@ -2,7 +2,7 @@ import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 
 // Mock MUI Icons before any other imports to prevent EMFILE
 vi.mock('@mui/icons-material', () => {
@@ -26,9 +26,9 @@ import App from '../App'
 describe('App', () => {
   it('renders layout and dashboard by default', () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/dashboard']}>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     )
     expect(screen.getByText('Admin Panel')).toBeInTheDocument()
     expect(screen.getByText('Dashboard Overview')).toBeInTheDocument()
@@ -37,9 +37,9 @@ describe('App', () => {
   it('navigates to each tab via the sidebar and renders the correct content', async () => {
     const user = userEvent.setup()
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/dashboard']}>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     )
 
     // Expenses

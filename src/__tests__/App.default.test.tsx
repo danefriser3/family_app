@@ -1,7 +1,7 @@
 import { vi } from 'vitest'
 import { render, screen } from '@testing-library/react'
 import React from 'react'
-import { BrowserRouter } from 'react-router-dom'
+import { MemoryRouter } from 'react-router-dom'
 
 // Mock MUI Icons before any other imports to prevent EMFILE
 vi.mock('@mui/icons-material', () => {
@@ -26,9 +26,9 @@ import App from '../App'
 describe('App default branch', () => {
   it('renders App without crashing', () => {
     render(
-      <BrowserRouter>
+      <MemoryRouter initialEntries={['/dashboard']}>
         <App />
-      </BrowserRouter>
+      </MemoryRouter>
     )
     expect(screen.getByText('Admin Panel')).toBeInTheDocument()
   })
