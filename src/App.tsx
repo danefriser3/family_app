@@ -7,6 +7,7 @@ import { Dashboard } from './pages/Dashboard';
 import Expenses from './pages/Expenses';
 import Incomes from './pages/Incomes';
 import Aldi from './pages/Aldi';
+import AldiDetail from './pages/AldiDetail';
 
 function App() {
   const location = useLocation();
@@ -22,6 +23,7 @@ function App() {
           <Route path="/expenses" element={<Expenses />} />
           <Route path="/incomes" element={<Incomes />} />
           <Route path="/aldi" element={<Aldi />} />
+          <Route path="/aldi/:sku" element={<AldiDetail />} />
           <Route path="/inventory" element={<div className="p-8 text-center text-gray-500">Inventario - In sviluppo</div>} />
           <Route path="/reports" element={<div className="p-8 text-center text-gray-500">Report - In sviluppo</div>} />
           <Route path="/profile" element={<div className="p-8 text-center text-gray-500">Profilo - In sviluppo</div>} />

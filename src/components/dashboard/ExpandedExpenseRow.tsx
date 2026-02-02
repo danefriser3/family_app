@@ -21,7 +21,11 @@ import {
   Stack,
   Divider,
   Checkbox,
-  IconButton
+  IconButton,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select
 } from '@mui/material';
 import Add from '@mui/icons-material/Add';
 import Delete from '@mui/icons-material/Delete';
@@ -35,6 +39,8 @@ interface ExpenseProduct {
   quantity: number;
   note: string;
   price: number;
+  item_type?: string;
+  scadenza: string;
 }
 interface GetExpenseProductsData {
   expenseProducts: ExpenseProduct[];
@@ -64,7 +70,7 @@ interface ExpandedExpenseRowProps {
 const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, selectedCard, expanded, selected, onSelect, onDelete, onExpand, cards, creditDeltaAfter }) => {
   const colSpan = selectedCard === 'all' ? 7 : 6;
   const [products, setProducts] = useState<ExpenseProduct[]>([]);
-  const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price' | 'note'>>({ name: '', quantity: 1, price: 0, note: '' });
+  const [newProduct, setNewProduct] = useState<Pick<ExpenseProduct, 'name' | 'quantity' | 'price' | 'note' | 'item_type' | 'scadenza'>>({ name: '', quantity: 1, price: 0, note: '', item_type: 'Altro', scadenza: '' });
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [getExpenseProducts, { data: productsData, loading: loadingProducts }] = useLazyQuery<GetExpenseProductsData>(GET_EXPENSE_PRODUCTS, { fetchPolicy: 'network-only' });
   const [addExpenseProduct] = useMutation(ADD_EXPENSE_PRODUCT);
@@ -104,11 +110,13 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
           name: newProduct.name,
           quantity: Number(newProduct.quantity),
           price: Number(newProduct.price),
-          note: newProduct.note
+          note: newProduct.note,
+          item_type: newProduct.item_type,
+          scadenza: newProduct.scadenza
         }
       }
     });
-    setNewProduct({ name: '', quantity: 1, price: 0, note: '' });
+    setNewProduct({ name: '', quantity: 1, price: 0, note: '', item_type: '', scadenza: '' });
     // Dopo aggiunta prodotto, rilancia la query
     getExpenseProducts({ variables: { expenseId: expense.id } });
   };
@@ -223,6 +231,31 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             fullWidth
                             sx={{ flexGrow: 1 }}
                           />
+                          <FormControl fullWidth >
+                            <InputLabel id="item-type-select-label">Tipo</InputLabel>
+                            <Select
+                              size="small"
+                              labelId="item-type-select-label"
+                              id="item-type-select"
+                              value={newProduct.item_type}
+                              label="Tipo"
+                              onChange={e => setNewProduct(p => ({ ...p, item_type: e.target.value }))}
+                              fullWidth
+                              sx={{ flexGrow: 1 }}
+                            >
+                              <MenuItem value={'Altro'}>Altro</MenuItem>
+                              <MenuItem value={'Alimentare'}>Alimentare</MenuItem>
+                            </Select>
+                          </FormControl>
+                          <TextField
+                            label="Scadenza"
+                            type="date"
+                            value={newProduct.scadenza}
+                            onChange={(e) => setNewProduct(p => ({ ...p, scadenza: e.target.value }))}
+                            required
+                            size="small"
+                            sx={{ minWidth: 150 }}
+                          />
                           <TextField
                             label="Quantità"
                             size="small"
@@ -266,6 +299,8 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                           <TableRow>
                             <TableCell>Nome</TableCell>
                             <TableCell>Nota</TableCell>
+                            <TableCell>Tipo</TableCell>
+                            <TableCell>Scadenza</TableCell>
                             <TableCell>Quantità</TableCell>
                             <TableCell>Prezzo</TableCell>
                           </TableRow>
@@ -273,7 +308,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                         <TableBody>
                           {products.length === 0 && (
                             <TableRow>
-                              <TableCell colSpan={3}>
+                              <TableCell colSpan={6}>
                                 <Typography variant="body2" padding={2} color="text.secondary" textAlign={'center'}>Nessun prodotto associato</Typography>
                               </TableCell>
                             </TableRow>
@@ -282,12 +317,14 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             <TableRow key={prod.id}>
                               <TableCell>{prod.name}</TableCell>
                               <TableCell>{prod.note}</TableCell>
+                              <TableCell>{prod.item_type ? prod.item_type : 'Altro'}</TableCell>
+                              <TableCell>{prod.scadenza ? new Date(parseInt(prod.scadenza)).toLocaleDateString() : '' }</TableCell>
                               <TableCell>{prod.quantity}</TableCell>
                               <TableCell>€ {prod.price}</TableCell>
                             </TableRow>
                           ))}
                           <TableRow>
-                            <TableCell colSpan={3} align="right"><strong>Totale Prodotti:</strong></TableCell>
+                            <TableCell colSpan={5} align="right"><strong>Totale Prodotti:</strong></TableCell>
                             <TableCell><strong>€ {products.reduce((sum, prod) => sum + prod.price, 0).toFixed(2)}</strong></TableCell>
                           </TableRow>
                         </TableBody>

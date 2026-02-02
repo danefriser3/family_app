@@ -27,6 +27,7 @@ export interface AldiProduct {
   price: number;
   image: string;
   category: string;
+  sku: string;
 }
 
 export interface AldiCategory {

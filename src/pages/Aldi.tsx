@@ -119,7 +119,11 @@ const Aldi = () => {
                         </TableHead>
                         <TableBody>
                             {paginatedProducts.map(product => (
-                                <TableRow key={product.id}>
+                                <TableRow 
+                                    key={product.id}
+                                    onClick={() => window.location.href = `/aldi/${product.sku}`}
+                                    sx={{ cursor: 'pointer', '&:hover': { backgroundColor: 'action.hover' } }}
+                                >
                                     <TableCell>
                                         {product.image ? <img src={product.image} alt={product.name} style={{ width: 50, height: 50, objectFit: 'contain' }} /> : 'N/A'}
                                     </TableCell>
