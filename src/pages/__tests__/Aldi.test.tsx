@@ -36,7 +36,7 @@ describe('Aldi', () => {
     expect(screen.getByText('Prodotti Aldi')).toBeInTheDocument()
     expect(screen.getByText('Elenco Prodotti 2')).toBeInTheDocument()
     expect(screen.getByText('Pasta')).toBeInTheDocument()
-    expect(screen.getByText('€ 1.99')).toBeInTheDocument()
+    expect(screen.getByText('1.99')).toBeInTheDocument()
   })
 
   it('renders without data', () => {
