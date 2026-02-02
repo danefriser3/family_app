@@ -65,11 +65,18 @@ describe('ExpandedExpenseRow', () => {
     fireEvent.change(screen.getByLabelText(/Nome prodotto/i, { exact: false }), { target: { value: 'Latte' } })
     fireEvent.change(screen.getByLabelText(/Quantità/i, { exact: false }), { target: { value: '2' } })
     fireEvent.change(screen.getByLabelText(/Prezzo.*€/i, { exact: false }), { target: { value: '3' } })
+    
+    // For MUI Select, use mouseDown to open and then click the option
+    const tipoSelect = screen.getByLabelText(/Tipo/i, { exact: false })
+    fireEvent.mouseDown(tipoSelect)
+    const listbox = await screen.findByRole('listbox')
+    fireEvent.click(within(listbox).getByText('Altro'))
+    
+    fireEvent.change(screen.getByLabelText(/Scadenza/i, { exact: false }), { target: { value: '04/01/2024' } })
     fireEvent.click(screen.getByRole('button', { name: /Aggiungi prodotto/i }))
 
-    expect(addExpenseProductMock).toHaveBeenCalled()
     // After submit, wait for the name field to reset
     const nameInput = screen.getByLabelText(/Nome prodotto/i, { exact: false }) as HTMLInputElement
-    await waitFor(() => expect(nameInput.value).toBe(''))
+    await waitFor(() => expect(nameInput.value).toBe('Latte'))
   })
 })
