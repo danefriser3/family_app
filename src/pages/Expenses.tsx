@@ -28,7 +28,7 @@ import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useMutation, useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
-import { ADD_EXPENSE, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
+import { ADD_EXPENSE, ADD_INCOME, DELETE_EXPENSE, DELETE_EXPENSES, UPDATE_CARD } from '../graphql/mutations';
 import { Card as CardType, GetCardsData, GetExpensesData, GetIncomesData } from '../types/graphql';
 import CardSelector from '../components/common/CardSelector';
 import CardEditorControls from '../components/common/CardEditorControls';
@@ -70,16 +70,18 @@ function buildExpenseRows(params: {
     } = params;
     const nodes: React.ReactNode[] = [];
     let lastDayKey: string | null = null;
-    for (const expense of expenses) {
+    for (let i = 0; i < expenses.length; i++) {
+        const expense = expenses[i];
         const currentKey = getDayKey(expense.date);
         const showDivider = lastDayKey !== null && currentKey !== lastDayKey;
         lastDayKey = currentKey;
         if (showDivider) {
+            const daySum = expenses.slice(i).filter(e => getDayKey(e.date) === currentKey).reduce((sum, e) => sum + e.amount, 0);
             nodes.push(
                 <TableRow key={`divider-${expense.id ?? currentKey}-${currentKey}`}>
                     <TableCell colSpan={selectedCard === 'all' ? 7 : 6} sx={{ py: 0.5, background: '#fafafa' }}>
                         <Divider textAlign="left">
-                            <Typography variant="caption">{new Date(Number(expense.date)).toLocaleDateString()}</Typography>
+                            <Typography variant="caption">{new Date(parseInt(expense.date)).toLocaleDateString()} - Totale: €{daySum.toFixed(2)}</Typography>
                         </Divider>
                     </TableCell>
                 </TableRow>
@@ -114,7 +116,9 @@ const Expenses: React.FC = () => {
     const theme = useTheme();
     const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
     const [allExpenses, setAllExpenses] = useState<Expense[]>([]);
-    const [selectedCard, setSelectedCard] = useState<string>('all');
+    const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
+    const revolutCard = cards?.cards.find(c => c.name.toLowerCase() === 'revolut');
+    const [selectedCard, setSelectedCard] = useState<string>(revolutCard?.id ?? 'all');
     const [description, setDescription] = useState('');
     const [amount, setAmount] = useState('');
     const [date, setDate] = useState('');
@@ -122,7 +126,6 @@ const Expenses: React.FC = () => {
     const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
 
-    const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
     const { data: expenses, loading, error, refetch } = useQuery<GetExpensesData>(GET_EXPENSES, {
         variables: { cardId: selectedCard === 'all' ? null : selectedCard },
         fetchPolicy: 'network-only'
@@ -136,7 +139,16 @@ const Expenses: React.FC = () => {
     const [deleteExpenses] = useMutation(DELETE_EXPENSES);
 
     const [addExpense] = useMutation(ADD_EXPENSE);
+    const [addIncome] = useMutation(ADD_INCOME);
     const [updateCard] = useMutation(UPDATE_CARD);
+
+
+    useEffect(() => {
+        if (cards && !selectedCard) {
+            const revolut = cards.cards.find(c => c.name.toLowerCase() === 'revolut');
+            if (revolut) setSelectedCard(revolut.id);
+        }
+    }, [cards, selectedCard]);
 
 
     useEffect(() => {
@@ -264,7 +276,7 @@ const Expenses: React.FC = () => {
         const newExpense: Expense = {
             description,
             amount: Number.parseFloat(amount),
-            date,
+            date: String(new Date(date).getTime()),
             category,
             card_id: selectedCard === 'all' ? undefined : selectedCard
         };
@@ -277,6 +289,55 @@ const Expenses: React.FC = () => {
         setAmount('');
         setDate('');
         setCategory('');
+    };
+
+    const [csvPreview, setCsvPreview] = useState<Expense[]>([]);
+
+    const handleCsvUpload = (file: File) => {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const text = e.target?.result as string;
+            const lines = text.split('\n').filter(line => line.trim());
+            const preview: Expense[] = [];
+
+            // Skip header row
+            lines.slice(1).forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 6) {
+                    const description = parts[4]?.trim();
+                    const amount = parts[5]?.trim();
+                    const dateComplete = parts[2]?.trim();
+
+                    if (description && amount && dateComplete) {
+                        const amountNum = Number.parseFloat(amount);
+                        const dateOnly = dateComplete.split(' ')[0];
+                        preview.push({
+                            description,
+                            amount: amountNum,
+                            date: String(new Date(dateOnly).getTime()),
+                            category: 'Importato',
+                            card_id: selectedCard
+                        });
+                    }
+                }
+            });
+            setCsvPreview(preview);
+        };
+        reader.readAsText(file);
+    };
+
+    const handleConfirmCsvImport = () => {
+        csvPreview.forEach(expense => {
+            console.log(expense.amount);
+            if(expense.amount < 0) {
+                expense.amount = Math.abs(expense.amount);
+                setAllExpenses(prev => ([expense, ...prev]));
+                addExpense({ variables: { expenseInput: expense } });
+            } else {
+                addIncome({ variables: { incomeInput: expense } });
+            }
+        });
+        setCsvPreview([]);
     };
 
     const handleSelect = (id: string) => {
@@ -391,6 +452,7 @@ const Expenses: React.FC = () => {
                                         onCategoryChange={setCategory}
                                         onDateChange={setDate}
                                         onSubmit={handleAddExpense}
+                                        onCsvUpload={handleCsvUpload}
                                     />
                                 </AccordionDetails>
                             </Accordion>
@@ -407,8 +469,48 @@ const Expenses: React.FC = () => {
                                 onCategoryChange={setCategory}
                                 onDateChange={setDate}
                                 onSubmit={handleAddExpense}
+                                onCsvUpload={handleCsvUpload}
                             />
                         )
+                    )}
+
+                    {csvPreview.length > 0 && (
+                        <Card>
+                            <CardHeader title="Anteprima CSV" />
+                            <CardContent>
+                                <Typography variant="body2" gutterBottom>
+                                    {csvPreview.length} spese da importare
+                                </Typography>
+                                <TableContainer component={Paper} sx={{ maxHeight: 400, mb: 2 }}>
+                                    <Table size="small">
+                                        <TableHead>
+                                            <TableRow>
+                                                <TableCell>Descrizione</TableCell>
+                                                <TableCell align="right">Importo (€)</TableCell>
+                                                <TableCell>Data</TableCell>
+                                            </TableRow>
+                                        </TableHead>
+                                        <TableBody>
+                                            {csvPreview.map((exp, idx) => (
+                                                <TableRow key={idx}>
+                                                    <TableCell>{exp.description}</TableCell>
+                                                    <TableCell align="right">{exp.amount.toFixed(2)}</TableCell>
+                                                    <TableCell>{exp.date}</TableCell>
+                                                </TableRow>
+                                            ))}
+                                        </TableBody>
+                                    </Table>
+                                </TableContainer>
+                                <Stack direction="row" spacing={2}>
+                                    <Button variant="contained" onClick={handleConfirmCsvImport}>
+                                        Conferma Importazione
+                                    </Button>
+                                    <Button variant="outlined" onClick={() => setCsvPreview([])}>
+                                        Annulla
+                                    </Button>
+                                </Stack>
+                            </CardContent>
+                        </Card>
                     )}
 
                     {isMobile ? (

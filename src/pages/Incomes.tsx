@@ -30,8 +30,9 @@ import CardEditorControls from '../components/common/CardEditorControls';
 import AddTransactionForm from '../components/common/AddTransactionForm';
 
 const Incomes = () => {
-  const [selectedCard, setSelectedCard] = useState<string>('all');
   const { data: cards } = useQuery<GetCardsData>(GET_CARDS);
+  const revolutCard = cards?.cards.find(c => c.name.toLowerCase() === 'revolut');
+  const [selectedCard, setSelectedCard] = useState<string>(revolutCard?.id ?? 'all');
   const { data: incomes, refetch, loading, error } = useQuery<GetIncomesData>(GET_INCOMES, {
     variables: { cardId: selectedCard === 'all' ? undefined : selectedCard },
     fetchPolicy: 'network-only'
@@ -51,6 +52,13 @@ const Incomes = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
 
   const selectedCardObj = selectedCard === 'all' ? undefined : cards?.cards.find(c => c.id === selectedCard);
+
+  useEffect(() => {
+    if (cards && !selectedCard) {
+      const revolut = cards.cards.find(c => c.name.toLowerCase() === 'revolut');
+      if (revolut) setSelectedCard(revolut.id);
+    }
+  }, [cards, selectedCard]);
 
   useEffect(() => {
     setCredito(String(selectedCardObj?.credito_iniziale ?? ''));
