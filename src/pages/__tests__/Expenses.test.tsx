@@ -17,6 +17,7 @@ vi.mock('../../graphql/queries', () => ({
 
 vi.mock('../../graphql/mutations', () => ({
   ADD_EXPENSE: 'ADD_EXPENSE',
+  ADD_INCOME: 'ADD_INCOME',
   DELETE_EXPENSE: 'DELETE_EXPENSE',
   DELETE_EXPENSES: 'DELETE_EXPENSES',
   UPDATE_CARD: 'UPDATE_CARD',
@@ -39,6 +40,7 @@ const mocks = {
   incomes: [] as Array<{ id?: string; description: string; amount: number; date: string; category?: string; card_id?: string }>,
   refetch: vi.fn(),
   addExpense: vi.fn().mockResolvedValue({}),
+  addIncome: vi.fn().mockResolvedValue({}),
   deleteExpense: vi.fn().mockResolvedValue({}),
   deleteExpenses: vi.fn().mockResolvedValue({}),
   updateCard: vi.fn().mockResolvedValue({}),
@@ -59,6 +61,7 @@ vi.mock('@apollo/client/react', () => ({
   },
   useMutation: (doc: unknown) => {
     if (doc === 'ADD_EXPENSE') return [mocks.addExpense]
+    if (doc === 'ADD_INCOME') return [mocks.addIncome]
     if (doc === 'DELETE_EXPENSE') return [mocks.deleteExpense]
     if (doc === 'DELETE_EXPENSES') return [mocks.deleteExpenses]
     if (doc === 'UPDATE_CARD') return [mocks.updateCard]
@@ -75,6 +78,7 @@ describe('Expenses', () => {
     mocks.incomes = []
     mocks.refetch.mockClear()
     mocks.addExpense.mockClear()
+    mocks.addIncome.mockClear()
     mocks.deleteExpense.mockClear()
     mocks.deleteExpenses.mockClear()
     mocks.updateCard.mockClear()
@@ -95,23 +99,23 @@ describe('Expenses', () => {
     const listbox = await screen.findByRole('listbox')
     await act(async () => { fireEvent.click(within(listbox).getByText('One')) })
 
-  // Form visible
-  expect(await screen.findByText(/Aggiungi Spesa/)).toBeInTheDocument()
+    // Form visible
+    expect(await screen.findByText(/Aggiungi Spesa/)).toBeInTheDocument()
 
     // Fill fields
     const desc = screen.getByRole('textbox', { name: /Descrizione/ })
     const amount = screen.getByRole('spinbutton', { name: /Importo/ })
     const category = screen.getByRole('textbox', { name: /Categoria/ })
-  // There are two date inputs: one in CardEditorControls (Data Inizio) and one in the form (Data)
-  const startDateInput = screen.getByLabelText('Data Inizio')
-  const dateInputs = Array.from(document.querySelectorAll('input[type="date"]'))
-  const dateInput = dateInputs.find((el) => el !== startDateInput) as HTMLInputElement | undefined
-  expect(dateInput).toBeTruthy()
+    // There are two date inputs: one in CardEditorControls (Data Inizio) and one in the form (Data)
+    const startDateInput = screen.getByLabelText('Data Inizio')
+    const dateInputs = Array.from(document.querySelectorAll('input[type="date"]'))
+    const dateInput = dateInputs.find((el) => el !== startDateInput) as HTMLInputElement | undefined
+    expect(dateInput).toBeTruthy()
     await act(async () => {
       fireEvent.change(desc, { target: { value: 'Biglietto' } })
       fireEvent.change(amount, { target: { value: '12.5' } })
       fireEvent.change(category, { target: { value: 'Trasporti' } })
-  fireEvent.change(dateInput as Element, { target: { value: '2025-09-30' } })
+      fireEvent.change(dateInput as Element, { target: { value: '2025-09-30' } })
     })
 
     // Add
@@ -124,7 +128,7 @@ describe('Expenses', () => {
       description: 'Biglietto',
       amount: 12.5,
       category: 'Trasporti',
-      date: '2025-09-30',
+      date: '1759190400000',
       card_id: 'c1',
     })
 
