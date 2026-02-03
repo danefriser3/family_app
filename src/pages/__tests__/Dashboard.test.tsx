@@ -12,6 +12,7 @@ describe('Dashboard', () => {
   it('renders heading and table title', () => {
     render(<Dashboard />)
     expect(screen.getByText('Dashboard Overview')).toBeInTheDocument()
-    expect(screen.getByText('Utenti Recenti')).toBeInTheDocument()
+    expect(screen.getByText('Spese per Giorno')).toBeInTheDocument()
+    expect(screen.getByText('Entrate per Giorno')).toBeInTheDocument()
   })
 })
