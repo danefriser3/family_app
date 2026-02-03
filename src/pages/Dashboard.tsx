@@ -13,7 +13,7 @@ import { StatCardData, Expense } from '../types';
 import { useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { Card as CardType } from '../types/graphql';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 
 const useTotals = () => {
     const { data: expensesData } = useQuery<{ expenses: Expense[] }>(GET_EXPENSES, { variables: { cardId: null } });
