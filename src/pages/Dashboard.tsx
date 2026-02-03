@@ -4,18 +4,16 @@ import {
   Box,
   Card,
   CardContent,
-  LinearProgress,
-  Chip
 } from '@mui/material';
 import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
 import ShoppingCartIcon from '@mui/icons-material/ShoppingCart';
 import Money from '@mui/icons-material/Money';
 import { StatCard } from '../components/dashboard/StatCard';
-import { DataTable } from '../components/dashboard/DataTable';
-import { StatCardData, TableColumn, Expense, User } from '../types';
+import { StatCardData, Expense } from '../types';
 import { useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { Card as CardType } from '../types/graphql';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
 
 const useTotals = () => {
     const { data: expensesData } = useQuery<{ expenses: Expense[] }>(GET_EXPENSES, { variables: { cardId: null } });
@@ -25,68 +23,40 @@ const useTotals = () => {
     const totalIncomes = incomesData?.incomes?.reduce((sum, i) => sum + (i.amount || 0), 0) || 0;
     const totalCreditoIniziale = cardsData?.cards?.reduce((sum, c) => sum + (c.credito_iniziale || 0), 0) || 0;
     const totalCreditoAttuale = totalCreditoIniziale + totalIncomes - totalExpenses;
-    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale };
+
+    const expensesByDay = expensesData?.expenses?.reduce((acc, e) => {
+        const timestamp = Number(e.date);
+        const day = new Date(timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+        if (!acc[day]) acc[day] = { total: 0, timestamp };
+        acc[day].total += e.amount;
+        return acc;
+    }, {} as Record<string, { total: number; timestamp: number }>) || {};
+
+    const incomesByDay = incomesData?.incomes?.reduce((acc, i) => {
+        const timestamp = Number(i.date);
+        const day = new Date(timestamp).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit' });
+        if (!acc[day]) acc[day] = { total: 0, timestamp };
+        acc[day].total += i.amount;
+        return acc;
+    }, {} as Record<string, { total: number; timestamp: number }>) || {};
+
+    const allDays = Array.from(new Set([...Object.keys(expensesByDay), ...Object.keys(incomesByDay)]));
+    const chartData = allDays
+        .map(day => ({
+            day,
+            spese: Number((expensesByDay[day]?.total || 0).toFixed(2)) || null,
+            entrate: Number((incomesByDay[day]?.total || 0).toFixed(2)) || null,
+            timestamp: expensesByDay[day]?.timestamp || incomesByDay[day]?.timestamp || 0
+        }))
+        .sort((a, b) => a.timestamp - b.timestamp);
+
+    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale, chartData: chartData.slice(-30) };
 };
 
-const recentUsers: User[] = [
-    {
-        id: 1,
-        name: 'Mario Rossi',
-        email: 'mario.rossi@email.com',
-        status: 'Attivo',
-        role: 'Admin',
-        lastLogin: '2 ore fa',
-    },
-    {
-        id: 2,
-        name: 'Giulia Bianchi',
-        email: 'giulia.bianchi@email.com',
-        status: 'Attivo',
-        role: 'User',
-        lastLogin: '5 ore fa',
-    },
-    {
-        id: 3,
-        name: 'Luca Verdi',
-        email: 'luca.verdi@email.com',
-        status: 'Inattivo',
-        role: 'User',
-        lastLogin: '2 giorni fa',
-    },
-    {
-        id: 4,
-        name: 'Anna Neri',
-        email: 'anna.neri@email.com',
-        status: 'Attivo',
-        role: 'Moderator',
-        lastLogin: '1 ora fa',
-    },
-];
-
-const tableColumns: TableColumn[] = [
-    { id: 'name', label: 'Nome' },
-    { id: 'email', label: 'Email' },
-    {
-        id: 'status',
-        label: 'Status',
-        format: (value) => {
-            const v = String(value);
-            return (
-            <Chip
-                label={v}
-                color={v === 'Attivo' ? 'success' : 'default'}
-                size="small"
-            />
-            );
-        },
-    },
-    { id: 'role', label: 'Ruolo' },
-    { id: 'lastLogin', label: 'Ultimo Accesso' },
-];
 
 
 export const Dashboard: React.FC = () => {
-    const { totalExpenses, totalIncomes, totalCreditoAttuale } = useTotals();
+    const { totalExpenses, totalIncomes, totalCreditoAttuale, chartData } = useTotals();
 
     const statsData: StatCardData[] = [
         {
@@ -140,101 +110,54 @@ export const Dashboard: React.FC = () => {
                 ))}
             </Box>
 
-            {/* Charts and Tables Section */}
+            {/* Charts Section */}
             <Box
                 sx={{
                     display: 'grid',
                     gridTemplateColumns: {
                         xs: '1fr',
-                        lg: '2fr 1fr'
+                        lg: 'repeat(2, 1fr)'
                     },
                     gap: 3
                 }}
             >
-                {/* Recent Activity */}
-                <Box>
-                    <DataTable
-                        title="Utenti Recenti"
-                        data={recentUsers as unknown as Record<string, unknown>[]}
-                        columns={tableColumns}
-                    />
-                </Box>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+                            Spese per Giorno
+                        </Typography>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <ComposedChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="day" />
+                                <YAxis scale="log" domain={['auto',  'dataMax + 5000']} allowDataOverflow />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="spese" fill="#f44336" name="Spese (€)" barSize={20} />
+                                <Line type="monotone" dataKey="spese" stroke="#d32f2f" strokeWidth={2} dot={false} name="Trend Spese" />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
 
-                {/* Quick Stats */}
-                <Box>
-                    <Card className="h-full">
-                        <CardContent>
-                            <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
-                                Statistiche Rapide
-                            </Typography>
-
-                            <Box className="space-y-4">
-                                <Box>
-                                    <Box className="flex justify-between items-center mb-1">
-                                        <Typography variant="body2" className="text-gray-600">
-                                            Utenti Attivi
-                                        </Typography>
-                                        <Typography variant="body2" className="font-semibold">
-                                            85%
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={85}
-                                        className="h-2 rounded-full"
-                                        sx={{ backgroundColor: '#e0e0e0' }}
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Box className="flex justify-between items-center mb-1">
-                                        <Typography variant="body2" className="text-gray-600">
-                                            Obiettivo Vendite
-                                        </Typography>
-                                        <Typography variant="body2" className="font-semibold">
-                                            72%
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={72}
-                                        className="h-2 rounded-full"
-                                        color="success"
-                                    />
-                                </Box>
-
-                                <Box>
-                                    <Box className="flex justify-between items-center mb-1">
-                                        <Typography variant="body2" className="text-gray-600">
-                                            Soddisfazione Cliente
-                                        </Typography>
-                                        <Typography variant="body2" className="font-semibold">
-                                            94%
-                                        </Typography>
-                                    </Box>
-                                    <LinearProgress
-                                        variant="determinate"
-                                        value={94}
-                                        className="h-2 rounded-full"
-                                        color="secondary"
-                                    />
-                                </Box>
-
-                                <Box className="pt-4 border-t border-gray-200">
-                                    <Typography variant="body2" className="text-gray-600 mb-2">
-                                        Performance del Sistema
-                                    </Typography>
-                                    <Box className="flex items-center gap-2">
-                                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
-                                        <Typography variant="body2" className="text-gray-700">
-                                            Tutti i servizi operativi
-                                        </Typography>
-                                    </Box>
-                                </Box>
-                            </Box>
-                        </CardContent>
-                    </Card>
-                </Box>
+                <Card>
+                    <CardContent>
+                        <Typography variant="h6" className="font-semibold text-gray-800 mb-4">
+                            Entrate per Giorno
+                        </Typography>
+                        <ResponsiveContainer width="100%" height={300}>
+                            <ComposedChart data={chartData}>
+                                <CartesianGrid strokeDasharray="3 3" />
+                                <XAxis dataKey="day" />
+                                <YAxis scale="log" domain={['auto', 'dataMax + 5000']} allowDataOverflow />
+                                <Tooltip />
+                                <Legend />
+                                <Bar dataKey="entrate" fill="#4caf50" name="Entrate (€)" barSize={20} />
+                                <Line type="monotone" dataKey="entrate" stroke="#1b5e20" strokeWidth={3} dot={{ fill: '#1b5e20', r: 4 }} name="Trend Entrate" connectNulls />
+                            </ComposedChart>
+                        </ResponsiveContainer>
+                    </CardContent>
+                </Card>
             </Box>
         </Box>
     );
