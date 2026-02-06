@@ -253,6 +253,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             value={newProduct.scadenza}
                             onChange={(e) => setNewProduct(p => ({ ...p, scadenza: e.target.value }))}
                             size="small"
+                            InputLabelProps={{ shrink: true }}
                             sx={{ minWidth: 150 }}
                           />
                           <TextField
@@ -317,7 +318,7 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                               <TableCell>{prod.name}</TableCell>
                               <TableCell>{prod.note}</TableCell>
                               <TableCell>{prod.item_type ? prod.item_type : 'Altro'}</TableCell>
-                              <TableCell>{prod.scadenza ? new Date(parseInt(prod.scadenza)).toLocaleDateString() : '' }</TableCell>
+                              <TableCell>{prod.scadenza ? new Date(parseInt(prod.scadenza)).toLocaleDateString() : ''}</TableCell>
                               <TableCell>{prod.quantity}</TableCell>
                               <TableCell>€ {prod.price}</TableCell>
                             </TableRow>
