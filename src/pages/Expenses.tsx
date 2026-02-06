@@ -403,16 +403,16 @@ const Expenses: React.FC = () => {
                         <Typography variant="h6">
                             Riepilogo {selectedCard === 'all' ? 'Tutte le Carte' : selectedCardObj?.name}
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
+                        <Typography variant="body1" color="text.secondary" data-cy="expense-summary-totals">
                             Spese totali: €{getTotalExpenses().toFixed(2)}
                         </Typography>
-                        <Typography variant="body1" color="text.secondary">
+                        <Typography variant="body1" color="text.secondary" data-cy="expense-summary-incomes">
                             Entrate totali: €{getTotalIncomes().toFixed(2)}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" data-cy="expense-summary-credito-attuale">
                             Credito attuale: €{getTotalCredito().toFixed(2)}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary">
+                        <Typography variant="body2" color="text.secondary" data-cy="expense-summary-numero-spese">
                             Numero spese: {getDisplayedExpenses().length}
                         </Typography>
                         {selectedCardObj && (

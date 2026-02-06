@@ -252,7 +252,6 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
                             type="date"
                             value={newProduct.scadenza}
                             onChange={(e) => setNewProduct(p => ({ ...p, scadenza: e.target.value }))}
-                            required
                             size="small"
                             sx={{ minWidth: 150 }}
                           />

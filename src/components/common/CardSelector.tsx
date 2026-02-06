@@ -34,6 +34,7 @@ export const CardSelector: React.FC<CardSelectorProps> = ({ cards, selectedCard,
         <InputLabel id="card-select-label">Seleziona Carta</InputLabel>
         <Select
           labelId="card-select-label"
+          data-cy="card-filter"
           value={selectedCard}
           onChange={handleChange}
           label="Seleziona Carta"
@@ -53,7 +54,8 @@ export const CardSelector: React.FC<CardSelectorProps> = ({ cards, selectedCard,
             </Box>
           </MenuItem>
           {cards?.map((card) => (
-            <MenuItem key={card.id} value={card.id}>
+            <MenuItem key={card.id} value={card.id}
+                  data-cy="card-selector">
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                 <Box
                   sx={{

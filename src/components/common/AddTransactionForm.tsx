@@ -39,7 +39,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
   };
 
   return (
-    <Card>
+    <Card data-cy="add-transaction-form">
       <CardHeader title={<Typography variant="h6">{title}{cardName ? ` a ${cardName}` : ''}</Typography>} />
       <Divider />
       <CardContent>
@@ -50,6 +50,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
               value={description}
               onChange={(e) => onDescriptionChange(e.target.value)}
               required
+              name="description"
               size="small"
               sx={{ minWidth: 200 }}
             />
@@ -59,6 +60,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
               value={amount}
               onChange={(e) => onAmountChange(e.target.value)}
               required
+              name="amount"
               size="small"
               sx={{ minWidth: 120 }}
             />
@@ -67,6 +69,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
               value={category}
               onChange={(e) => onCategoryChange(e.target.value)}
               required
+              name="category"
               size="small"
               sx={{ minWidth: 150 }}
             />
@@ -76,6 +79,7 @@ export const AddTransactionForm: React.FC<AddTransactionFormProps> = ({
               value={date}
               onChange={(e) => onDateChange(e.target.value)}
               required
+              name="date"
               size="small"
               sx={{ minWidth: 150 }}
               InputLabelProps={{ shrink: true }}

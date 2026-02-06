@@ -34,7 +34,7 @@ export const StatCard: React.FC<StatCardData> = ({
             <Typography variant="h6" className="text-gray-600 font-medium">
               {title}
             </Typography>
-            <Typography variant="h4" className="font-bold text-gray-800 mt-1">
+            <Typography variant="h4" className="font-bold text-gray-800 mt-1" data-cy={`stat-card-${title.replace(/\s+/g, '-').toLowerCase()}`}>
               {value}
             </Typography>
             {change === undefined ? null : (
@@ -60,6 +60,7 @@ export const StatCard: React.FC<StatCardData> = ({
           </Box>
           <Avatar
             className={`${colorClasses[color]} text-white w-16 h-16`}
+            data-cy={`stat-card-avatar-${title.replace(/\s+/g, '-').toLowerCase()}`}
             sx={{ bgcolor: color }}
           >
             {icon}
