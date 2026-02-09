@@ -13,7 +13,7 @@ import { StatCardData, Expense } from '../types';
 import { useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { Card as CardType } from '../types/graphql';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, Line, ComposedChart } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, Brush } from 'recharts';
 
 const useTotals = () => {
     const { data: expensesData } = useQuery<{ expenses: Expense[] }>(GET_EXPENSES, { variables: { cardId: null } });
@@ -22,7 +22,7 @@ const useTotals = () => {
     const totalExpenses = expensesData?.expenses?.reduce((sum, e) => sum + (e.amount || 0), 0) || 0;
     const totalIncomes = incomesData?.incomes?.reduce((sum, i) => sum + (i.amount || 0), 0) || 0;
     const totalCreditoIniziale = cardsData?.cards?.reduce((sum, c) => sum + (c.credito_iniziale || 0), 0) || 0;
-    const totalCreditoAttuale = totalCreditoIniziale + totalIncomes - totalExpenses;
+    const totalCreditoAttuale = totalIncomes - totalExpenses;
 
     const expensesByDay = expensesData?.expenses?.reduce((acc, e) => {
         const timestamp = Number(e.date);
@@ -50,13 +50,16 @@ const useTotals = () => {
         }))
         .sort((a, b) => a.timestamp - b.timestamp);
 
-    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale, chartData: chartData.slice(-30) };
+    return { totalExpenses, totalIncomes, totalCreditoIniziale, totalCreditoAttuale, chartData };
 };
 
 
 
 export const Dashboard: React.FC = () => {
     const { totalExpenses, totalIncomes, totalCreditoAttuale, chartData } = useTotals();
+
+    const defaultStartIndex = Math.max(0, chartData.length - 30);
+    const defaultEndIndex = chartData.length - 1;
 
     const statsData: StatCardData[] = [
         {
@@ -133,8 +136,9 @@ export const Dashboard: React.FC = () => {
                                 <YAxis scale="log" domain={['auto',  'dataMax + 5000']} allowDataOverflow />
                                 <Tooltip />
                                 <Legend />
-                                <Bar dataKey="spese" fill="#f44336" name="Spese (€)" barSize={20} />
-                                <Line type="monotone" dataKey="spese" stroke="#d32f2f" strokeWidth={2} dot={false} name="Trend Spese" />
+                                <Bar dataKey="spese" fill="#f44336" name="Spese (€)" barSize={5} animationDuration={800} animationEasing="ease-in-out" />
+                                <Area type="monotone" dataKey="spese" stroke="#d32f11" strokeWidth={2} dot={{ fill: '#d32f2f', r: 2 }} name="Trend Spese" animationDuration={800} animationEasing="ease-in-out" />
+                                <Brush  dataKey="day" height={30} stroke="#8884d8" travellerWidth={10} startIndex={defaultStartIndex} endIndex={defaultEndIndex} />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </CardContent>
@@ -152,8 +156,9 @@ export const Dashboard: React.FC = () => {
                                 <YAxis scale="log" domain={['auto', 'dataMax + 5000']} allowDataOverflow />
                                 <Tooltip />
                                 <Legend />
-                                <Bar dataKey="entrate" fill="#4caf50" name="Entrate (€)" barSize={20} />
-                                <Line type="monotone" dataKey="entrate" stroke="#1b5e20" strokeWidth={3} dot={{ fill: '#1b5e20', r: 4 }} name="Trend Entrate" connectNulls />
+                                <Bar dataKey="entrate" fill="#4caf50" name="Entrate (€)" barSize={5} animationDuration={800} animationEasing="ease-in-out" />
+                                <Area type="monotone" dataKey="entrate" stroke="#1b5e20" strokeWidth={2} dot={{ fill: '#1b5e20', r: 2 }} name="Trend Entrate" connectNulls animationDuration={800} animationEasing="ease-in-out" />
+                                <Brush dataKey="day" height={30} stroke="#8884d8" travellerWidth={10} startIndex={defaultStartIndex} endIndex={defaultEndIndex} />
                             </ComposedChart>
                         </ResponsiveContainer>
                     </CardContent>
