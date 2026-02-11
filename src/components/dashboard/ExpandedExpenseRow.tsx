@@ -98,8 +98,8 @@ const ExpandedExpenseRow: React.FC<ExpandedExpenseRowProps> = ({ expense, select
     e.preventDefault();
     if (!newProduct.name || !newProduct.quantity || !newProduct.price) return;
     const totalProducts = products.reduce((sum: number, prod: ExpenseProduct) => sum + Number(prod.price), 0);
-    const newTotal = totalProducts + Number(newProduct.price);
-    if (expense && newTotal > expense.amount) {
+    const newTotal = (totalProducts + Number(newProduct.price)).toFixed(2);
+    if (expense && Number(newTotal) > expense.amount) {
       setSnackbarOpen(true);
       return;
     }

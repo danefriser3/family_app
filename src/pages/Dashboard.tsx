@@ -13,7 +13,7 @@ import { StatCardData, Expense } from '../types';
 import { useQuery } from '@apollo/client/react';
 import { GET_CARDS, GET_EXPENSES, GET_INCOMES } from '../graphql/queries';
 import { Card as CardType } from '../types/graphql';
-import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, Brush } from 'recharts';
+import { Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, ComposedChart, Area, Brush, ReferenceLine } from 'recharts';
 
 const useTotals = () => {
     const { data: expensesData } = useQuery<{ expenses: Expense[] }>(GET_EXPENSES, { variables: { cardId: null } });
@@ -60,6 +60,10 @@ export const Dashboard: React.FC = () => {
 
     const defaultStartIndex = Math.max(0, chartData.length - 30);
     const defaultEndIndex = chartData.length - 1;
+
+    const firstDayOfMonthIndices = chartData
+        .map((item, index) => (item.day.startsWith('01/') ? index : -1))
+        .filter(index => index !== -1);
 
     const statsData: StatCardData[] = [
         {
@@ -133,9 +137,12 @@ export const Dashboard: React.FC = () => {
                             <ComposedChart data={chartData}>
                                 <CartesianGrid strokeDasharray="3 3" />
                                 <XAxis dataKey="day" />
-                                <YAxis scale="log" domain={['auto',  'dataMax + 5000']} allowDataOverflow />
+                                <YAxis scale="log" domain={['auto',  'dataMax + 10000']} allowDataOverflow />
                                 <Tooltip />
                                 <Legend />
+                                {firstDayOfMonthIndices.map(index => (
+                                    <ReferenceLine key={index} x={chartData[index].day} stroke="#666" strokeWidth={2} strokeDasharray="5 5" />
+                                ))}
                                 <Bar dataKey="spese" fill="#f44336" name="Spese (€)" barSize={5} animationDuration={800} animationEasing="ease-in-out" />
                                 <Area type="monotone" dataKey="spese" stroke="#d32f11" strokeWidth={2} dot={{ fill: '#d32f2f', r: 2 }} name="Trend Spese" animationDuration={800} animationEasing="ease-in-out" />
                                 <Brush  dataKey="day" height={30} stroke="#8884d8" travellerWidth={10} startIndex={defaultStartIndex} endIndex={defaultEndIndex} />
@@ -156,6 +163,9 @@ export const Dashboard: React.FC = () => {
                                 <YAxis scale="log" domain={['auto', 'dataMax + 5000']} allowDataOverflow />
                                 <Tooltip />
                                 <Legend />
+                                {firstDayOfMonthIndices.map(index => (
+                                    <ReferenceLine key={index} x={chartData[index].day} stroke="#666" strokeWidth={2} strokeDasharray="5 5" />
+                                ))}
                                 <Bar dataKey="entrate" fill="#4caf50" name="Entrate (€)" barSize={5} animationDuration={800} animationEasing="ease-in-out" />
                                 <Area type="monotone" dataKey="entrate" stroke="#1b5e20" strokeWidth={2} dot={{ fill: '#1b5e20', r: 2 }} name="Trend Entrate" connectNulls animationDuration={800} animationEasing="ease-in-out" />
                                 <Brush dataKey="day" height={30} stroke="#8884d8" travellerWidth={10} startIndex={defaultStartIndex} endIndex={defaultEndIndex} />
